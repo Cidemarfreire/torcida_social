@@ -75,29 +75,9 @@ function Cadastro() {
       setLoading(false);
       return toast.error(error.message);
     }
-    if (data.user) {
-      const { error: profileError } = await supabase.from("profiles").upsert({
-        id: data.user.id,
-        full_name: parsed.data.fullName,
-        city: parsed.data.city,
-        club_id: clubId,
-        phone: parsed.data.phone,
-        birth_date: parsed.data.birthDate,
-        referred_by: parsed.data.referredBy || null,
-        referral_code: data.user.id.replaceAll("-", "").slice(0, 10).toUpperCase(),
-        supporter_card_id: `TOR-${new Date().getFullYear()}-${data.user.id.replaceAll("-", "").slice(0, 6).toUpperCase()}`,
-        supporter_card_status: "active",
-        profile_completed: true,
-      }, { onConflict: "id" });
-
-      if (profileError) {
-        setLoading(false);
-        return toast.error(`Conta criada, mas houve erro ao salvar o perfil: ${profileError.message}`);
-      }
-    }
     setLoading(false);
-    toast.success("Conta criada! Verifique seu e-mail para confirmar.");
-    navigate({ to: "/perfil" });
+    toast.success(data.session ? "Conta criada com sucesso!" : "Conta criada! Verifique seu e-mail para confirmar.");
+    navigate({ to: data.session ? "/perfil" : "/login" });
   };
 
   const handleGoogle = async () => {
