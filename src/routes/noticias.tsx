@@ -57,7 +57,7 @@ function Noticias() {
         ) : isError ? (
           <PreviewGrid />
         ) : (
-          <EmptyState />
+          <PreviewGrid />
         )}
       </section>
     </SiteLayout>
@@ -153,11 +153,18 @@ function EmptyState() {
 function PreviewGrid() {
   return (
     <div>
-      <div className="bg-gold/10 border border-gold/30 rounded-3xl p-6 mb-6">
-        <p className="text-sm font-bold text-navy">
-          Previa local: conecte o Supabase e aplique a migration para exibir
-          noticias aprovadas.
-        </p>
+      <div className="bg-gold/10 border border-gold/30 rounded-3xl p-6 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-action">
+            Curadoria inicial
+          </p>
+          <p className="text-sm font-bold text-navy mt-1">
+            Enquanto a IA gera e o time aprova novas pautas, estes destaques mantêm a central ativa.
+          </p>
+        </div>
+        <span className="text-xs font-black uppercase tracking-widest text-navy/50">
+          IA + curadoria
+        </span>
       </div>
       <div className="grid md:grid-cols-3 gap-6">
         {NEWS.map((item) => (

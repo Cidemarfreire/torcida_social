@@ -140,10 +140,31 @@ function Admin() {
                     <p className="text-sm text-navy/65 mt-2 leading-relaxed">
                       {item.summary}
                     </p>
-                    {item.sources.length > 0 && (
-                      <p className="text-xs text-navy/45 mt-2">
-                        {item.sources.length} fonte(s) anexada(s)
+                    {item.social_relevance && (
+                      <p className="text-sm text-navy/65 mt-3 leading-relaxed">
+                        <strong className="text-navy">Impacto social: </strong>
+                        {item.social_relevance}
                       </p>
+                    )}
+                    {item.call_to_action && (
+                      <p className="text-sm font-bold text-action mt-3">
+                        {item.call_to_action}
+                      </p>
+                    )}
+                    {item.sources.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {item.sources.slice(0, 3).map((source, index) => (
+                          <a
+                            key={source}
+                            href={source}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs font-bold text-action underline"
+                          >
+                            Fonte {index + 1}
+                          </a>
+                        ))}
+                      </div>
                     )}
                   </div>
                   <div className="flex flex-wrap lg:justify-end items-start gap-2">
