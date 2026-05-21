@@ -21,8 +21,13 @@ function Perfil() {
     created_at: string;
     supporter_card_id: string | null;
     referral_code: string | null;
+    avatar_url: string | null;
   } | null>(null);
   const [email, setEmail] = useState("");
+  const [userId, setUserId] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [savingAvatar, setSavingAvatar] = useState(false);
+  const [avatarMessage, setAvatarMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProfile() {
@@ -36,14 +41,16 @@ function Perfil() {
       }
 
       setEmail(user.email || "");
+      setUserId(user.id);
 
       const { data } = await supabase
         .from("profiles")
-        .select("full_name, city, club_id, created_at, supporter_card_id, referral_code")
+        .select("full_name, city, club_id, created_at, supporter_card_id, referral_code, avatar_url")
         .eq("id", user.id)
         .maybeSingle();
 
       setProfile(data);
+      setAvatarUrl(data?.avatar_url || "");
       setLoading(false);
     }
 
@@ -62,6 +69,32 @@ function Perfil() {
   }, [name]);
   const since = profile?.created_at ? new Date(profile.created_at).getFullYear() : new Date().getFullYear();
 
+  const saveAvatar = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setAvatarMessage(null);
+
+    const nextAvatarUrl = avatarUrl.trim();
+    if (nextAvatarUrl && !/^https?:\/\/.+/i.test(nextAvatarUrl)) {
+      setAvatarMessage("Informe uma URL de imagem começando com http:// ou https://");
+      return;
+    }
+
+    setSavingAvatar(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ avatar_url: nextAvatarUrl || null })
+      .eq("id", userId);
+    setSavingAvatar(false);
+
+    if (error) {
+      setAvatarMessage(error.message);
+      return;
+    }
+
+    setProfile((current) => current ? { ...current, avatar_url: nextAvatarUrl || null } : current);
+    setAvatarMessage(nextAvatarUrl ? "Avatar atualizado com sucesso." : "Avatar removido com sucesso.");
+  };
+
   if (loading) {
     return (
       <SiteLayout>
@@ -79,9 +112,17 @@ function Perfil() {
         style={{ background: `linear-gradient(135deg, ${club.primary} 0%, ${club.secondary} 100%)` }}
       >
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center md:items-end gap-6">
-          <div className="size-28 rounded-3xl bg-background/15 backdrop-blur grid place-items-center text-5xl font-display font-black">
-            {initials}
-          </div>
+          {profile?.avatar_url ? (
+            <img
+              src={profile.avatar_url}
+              alt={name}
+              className="size-28 rounded-3xl object-cover bg-background/15 backdrop-blur"
+            />
+          ) : (
+            <div className="size-28 rounded-3xl bg-background/15 backdrop-blur grid place-items-center text-5xl font-display font-black">
+              {initials}
+            </div>
+          )}
           <div className="flex-1 text-center md:text-left">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] opacity-80">Torcedor desde {since}</p>
             <h1 className="font-display text-4xl md:text-5xl font-black mt-2">{name}</h1>
@@ -108,6 +149,44 @@ function Perfil() {
             <p className="font-display text-3xl font-black mt-1 text-navy">{s.value}</p>
           </div>
         ))}
+      </section>
+
+      <section className="px-6 mb-16 max-w-7xl mx-auto">
+        <form onSubmit={saveAvatar} className="bg-card border border-navy/5 rounded-2xl p-6 shadow-sm space-y-4">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-navy/50">Foto ou avatar</p>
+            <p className="text-sm text-navy/60 mt-1">Cole a URL de uma imagem para personalizar seu perfil.</p>
+          </div>
+          <div className="grid md:grid-cols-[1fr_auto_auto] gap-3">
+            <input
+              type="url"
+              value={avatarUrl}
+              onChange={(event) => setAvatarUrl(event.target.value)}
+              placeholder="https://exemplo.com/minha-foto.jpg"
+              className="w-full bg-surface border-2 border-navy/10 px-4 py-3 rounded-xl font-medium focus:border-action outline-none transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={savingAvatar}
+              className="bg-navy text-background px-6 py-3 rounded-xl font-black hover:bg-action transition-colors disabled:opacity-50"
+            >
+              {savingAvatar ? "SALVANDO..." : "SALVAR"}
+            </button>
+            <button
+              type="button"
+              disabled={savingAvatar || !avatarUrl}
+              onClick={() => setAvatarUrl("")}
+              className="border-2 border-navy/10 text-navy px-6 py-3 rounded-xl font-black hover:border-action transition-colors disabled:opacity-50"
+            >
+              REMOVER
+            </button>
+          </div>
+          {avatarMessage && (
+            <div className="bg-surface border border-navy/10 text-sm rounded-lg px-4 py-3 text-navy/70">
+              {avatarMessage}
+            </div>
+          )}
+        </form>
       </section>
 
       <section className="px-6 max-w-7xl mx-auto">
