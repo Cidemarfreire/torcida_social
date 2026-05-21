@@ -45,39 +45,49 @@ function Cadastro() {
     referredBy: "",
   });
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [k]: e.target.value });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
+      setErrorMessage(parsed.error.issues[0].message);
       return toast.error(parsed.error.issues[0].message);
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: parsed.data.email,
-      password: parsed.data.password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: {
-          full_name: parsed.data.fullName,
-          city: parsed.data.city,
-          club_id: clubId,
-          phone: parsed.data.phone,
-          birth_date: parsed.data.birthDate,
-          referred_by: parsed.data.referredBy || null,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: parsed.data.email,
+        password: parsed.data.password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            full_name: parsed.data.fullName,
+            city: parsed.data.city,
+            club_id: clubId,
+            phone: parsed.data.phone,
+            birth_date: parsed.data.birthDate,
+            referred_by: parsed.data.referredBy || null,
+          },
         },
-      },
-    });
-    if (error) {
+      });
+      if (error) {
+        setErrorMessage(error.message);
+        return toast.error(error.message);
+      }
+      toast.success(data.session ? "Conta criada com sucesso!" : "Conta criada! Verifique seu e-mail para confirmar.");
+      navigate({ to: data.session ? "/perfil" : "/login" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro inesperado ao criar conta";
+      setErrorMessage(message);
+      toast.error(message);
+    } finally {
       setLoading(false);
-      return toast.error(error.message);
     }
-    setLoading(false);
-    toast.success(data.session ? "Conta criada com sucesso!" : "Conta criada! Verifique seu e-mail para confirmar.");
-    navigate({ to: data.session ? "/perfil" : "/login" });
   };
 
   const handleGoogle = async () => {
@@ -118,6 +128,12 @@ function Cadastro() {
             <Field label="Data de nascimento" type="date" value={form.birthDate} onChange={set("birthDate")} required />
             <Field label="Código de indicação" value={form.referredBy} onChange={set("referredBy")} placeholder="Opcional" className="md:col-span-2" />
           </div>
+
+          {errorMessage && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+              {errorMessage}
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-navy/50 mb-3">Time do coração</label>
