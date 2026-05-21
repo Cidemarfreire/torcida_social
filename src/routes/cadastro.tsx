@@ -6,7 +6,6 @@ import { PageHero } from "@/components/site/PageHero";
 import { ClubBadge } from "@/components/site/ClubBadge";
 import { SERIE_A_CLUBS } from "@/lib/mock-data";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/cadastro")({
@@ -102,10 +101,13 @@ function Cadastro() {
   };
 
   const handleGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/completar-perfil",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/completar-perfil",
+      },
     });
-    if (result.error) return toast.error("Falha no login com Google");
+    if (error) return toast.error("Falha no login com Google");
   };
 
   return (

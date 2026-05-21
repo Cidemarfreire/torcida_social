@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { toast } from "sonner";
 
@@ -27,12 +26,13 @@ function LoginPage() {
   };
 
   const handleGoogle = async () => {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/perfil",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + "/perfil",
+      },
     });
-    if (result.error) return toast.error("Falha no login com Google");
-    if (result.redirected) return;
-    navigate({ to: "/perfil" });
+    if (error) return toast.error("Falha no login com Google");
   };
 
   return (
