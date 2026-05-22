@@ -1,9 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowRight, Newspaper, Sparkles } from "lucide-react";
+import { ArrowRight, Newspaper, Rss } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { ClubBadge } from "@/components/site/ClubBadge";
 import { SERIE_A_CLUBS, STATS, RANKING, PROJECTS, formatBRL, formatInt } from "@/lib/mock-data";
+import {
+  fetchPublishedNews,
+  NEWS_TOPIC_DESCRIPTIONS,
+  NEWS_TOPIC_LABELS,
+  NEWS_TOPICS,
+  pickFeaturedByTopic,
+  type NewsTopic,
+} from "@/lib/news";
 import heroImg from "@/assets/hero-torcida.jpg";
 import criancaImg from "@/assets/crianca-bola.jpg";
 import projEsporte from "@/assets/projeto-esporte.jpg";
@@ -28,30 +37,36 @@ const projectImages: Record<string, string> = {
   cursos: projCursos,
 };
 
-const newsPrompts = [
+const fallbackTopics: { topic: NewsTopic; title: string; text: string }[] = [
   {
-    id: "social",
-    label: "Esporte social",
-    title: "Acoes sociais no futebol brasileiro",
-    text: "Veja campanhas, projetos comunitarios e iniciativas de clubes, torcidas e atletas.",
+    topic: "social_sports",
+    title: "Esporte social no Brasil",
+    text: NEWS_TOPIC_DESCRIPTIONS.social_sports,
   },
   {
-    id: "selecao",
-    label: "Selecao",
-    title: "Brasil rumo a Copa",
-    text: "Acompanhe noticias verificadas sobre a Selecao Brasileira no ciclo da Copa.",
+    topic: "selecao_brasileira",
+    title: "Selecao rumo a Copa",
+    text: NEWS_TOPIC_DESCRIPTIONS.selecao_brasileira,
   },
   {
-    id: "impacto",
-    label: "Impacto",
-    title: "O que muda para a Torcida Social",
-    text: "Entenda por que cada pauta importa para mobilizar torcedores e parceiros.",
+    topic: "copa",
+    title: "Mundo dos esportes",
+    text: NEWS_TOPIC_DESCRIPTIONS.copa,
   },
 ];
 
 function Home() {
   const top3 = RANKING.slice(0, 3);
-  const [activeNews, setActiveNews] = useState(newsPrompts[0]);
+  const [activeTopic, setActiveTopic] = useState<NewsTopic>("social_sports");
+  const { data: publishedNews = [] } = useQuery({
+    queryKey: ["published-news", "home"],
+    queryFn: () => fetchPublishedNews(),
+    retry: 1,
+    staleTime: 60_000,
+  });
+  const featured = pickFeaturedByTopic(publishedNews);
+  const activeItem = featured[activeTopic];
+  const activeFallback = fallbackTopics.find((item) => item.topic === activeTopic)!;
 
   return (
     <SiteLayout>
@@ -96,28 +111,28 @@ function Home() {
                       Central de Noticias
                     </p>
                     <p className="text-sm font-black text-navy">
-                      IA + curadoria humana, 3 vezes ao dia
+                      RSS + curadoria, 3 vezes ao dia
                     </p>
                   </div>
                 </div>
-                <Sparkles className="text-gold shrink-0" size={18} />
+                <Rss className="text-gold shrink-0" size={18} />
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                {newsPrompts.map((item) => {
-                  const active = activeNews.id === item.id;
+                {NEWS_TOPICS.map((topic) => {
+                  const active = activeTopic === topic;
                   return (
                     <button
-                      key={item.id}
+                      key={topic}
                       type="button"
-                      onClick={() => setActiveNews(item)}
+                      onClick={() => setActiveTopic(topic)}
                       className={`px-3 py-2 rounded-full text-xs font-bold border transition-colors ${
                         active
                           ? "bg-navy text-background border-navy"
                           : "bg-background text-navy/65 border-navy/10 hover:border-action"
                       }`}
                     >
-                      {item.label}
+                      {NEWS_TOPIC_LABELS[topic]}
                     </button>
                   );
                 })}
@@ -125,10 +140,10 @@ function Home() {
 
               <div className="mt-4 bg-surface rounded-xl p-4">
                 <h2 className="font-display text-lg font-black leading-tight">
-                  {activeNews.title}
+                  {activeItem?.title ?? activeFallback.title}
                 </h2>
                 <p className="text-sm text-navy/60 mt-1 leading-relaxed">
-                  {activeNews.text}
+                  {activeItem?.summary ?? activeFallback.text}
                 </p>
                 <Link
                   to="/noticias"

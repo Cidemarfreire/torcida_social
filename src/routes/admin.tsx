@@ -78,7 +78,7 @@ function Admin() {
           <div className="px-6 py-4 border-b border-navy/5 flex justify-between items-center">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest text-action">
-                IA - Curadoria
+                RSS - Curadoria
               </p>
               <h2 className="font-display text-xl font-black">
                 Rascunhos de noticias
@@ -90,24 +90,25 @@ function Admin() {
           </div>
           <div className="px-6 py-4 border-b border-navy/5 flex flex-wrap gap-3 items-center justify-between">
             <p className="text-sm text-navy/60">
-              Gere rascunhos com IA agora ou aguarde o agendamento configurado no Supabase/cron.
+              Coleta pautas gratis via RSS (Google News) — 3 temas, sem API paga de IA.
+              Agendamento: GitHub Actions 08h, 14h e 20h (SP).
             </p>
             <button
               onClick={() => generateNews.mutate()}
               disabled={generateNews.isPending}
               className="bg-action text-background px-5 py-3 rounded-xl text-xs font-bold disabled:opacity-50"
             >
-              {generateNews.isPending ? "Gerando..." : "Gerar notícias agora"}
+              {generateNews.isPending ? "Coletando..." : "Coletar noticias agora"}
             </button>
           </div>
           {generateNews.isError && (
             <div className="px-6 py-3 bg-red-50 border-b border-red-100 text-sm font-bold text-red-700">
-              {generateNews.error instanceof Error ? generateNews.error.message : "Falha ao gerar notícias"}
+              {generateNews.error instanceof Error ? generateNews.error.message : "Falha ao coletar noticias"}
             </div>
           )}
           {generateNews.isSuccess && (
             <div className="px-6 py-3 bg-success/10 border-b border-success/20 text-sm font-bold text-success">
-              IA executada. Novos rascunhos inseridos: {generateNews.data?.inserted ?? 0}
+              Coleta concluida. Novos rascunhos: {generateNews.data?.inserted ?? 0}
             </div>
           )}
           {newsDrafts.length === 0 ? (

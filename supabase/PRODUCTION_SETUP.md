@@ -24,10 +24,10 @@ MERCADOPAGO_ACCESS_TOKEN=APP_USR...
 MERCADOPAGO_WEBHOOK_SECRET=um-segredo-forte
 SUPABASE_URL=https://yqmgtqtrpxoqbgpkdjcg.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=...
-GEMINI_API_KEY=...
 GENERATE_NEWS_SECRET=um-segredo-forte
-GEMINI_MODEL=gemini-2.5-flash
 ```
+
+> **Noticias:** nao e necessario `GEMINI_API_KEY`. A coleta usa RSS publico (Google News), sem custo de IA.
 
 ## Banco
 
@@ -55,22 +55,26 @@ Eventos necessários:
 - `payment`
 - `preapproval`
 
-## Notícias automáticas
+## Notícias automáticas (sem IA paga)
 
-Para rodar manualmente, use o botão `Gerar notícias agora` no `/admin`.
+1. Deploy da funcao: `supabase functions deploy generate-news-drafts`
+2. Manual: botao **Coletar noticias agora** em `/admin`
+3. Automatico 3x/dia: workflow `.github/workflows/generate-news.yml`
 
-Para rodar 3 vezes por dia, configure um cron externo, GitHub Actions, Supabase Scheduler ou Cloudflare Cron para chamar:
+Secrets no GitHub (Settings → Secrets → Actions):
 
-```text
-POST https://yqmgtqtrpxoqbgpkdjcg.supabase.co/functions/v1/generate-news-drafts
-x-generate-news-secret: um-segredo-forte
-```
+- `GENERATE_NEWS_SECRET` — mesmo valor do Supabase
+- `GENERATE_NEWS_FUNCTION_URL` — `https://yqmgtqtrpxoqbgpkdjcg.supabase.co/functions/v1/generate-news-drafts`
 
-Sugestão de horários São Paulo:
+Horarios (Sao Paulo): 08:00, 14:00 e 20:00.
 
-- 08:00
-- 14:00
-- 20:00
+Temas coletados:
+
+- **Esporte social** — impacto social pelo esporte no Brasil
+- **Selecao Brasileira** — rumo a Copa
+- **Mundo dos esportes** — panorama internacional
+
+Fluxo: RSS gera rascunhos → admin **Aprovar** ou **Publicar** → aparecem em `/noticias`.
 
 ## Fluxo de pagamento implementado
 

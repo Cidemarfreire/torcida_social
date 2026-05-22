@@ -1,14 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, Newspaper, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { ExternalLink, Newspaper, Rss } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { NEWS } from "@/lib/mock-data";
 import {
   fetchPublishedNews,
   formatNewsDate,
+  NEWS_TOPIC_DESCRIPTIONS,
   NEWS_TOPIC_LABELS,
+  NEWS_TOPICS,
   type NewsDraft,
+  type NewsTopic,
 } from "@/lib/news";
 
 export const Route = createFileRoute("/noticias")({
@@ -26,13 +30,18 @@ export const Route = createFileRoute("/noticias")({
 });
 
 function Noticias() {
+  const [activeTopic, setActiveTopic] = useState<NewsTopic | "all">("all");
+
   const {
     data: news = [],
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["published-news"],
-    queryFn: fetchPublishedNews,
+    queryKey: ["published-news", activeTopic],
+    queryFn: () =>
+      activeTopic === "all"
+        ? fetchPublishedNews()
+        : fetchPublishedNews(activeTopic),
     retry: 1,
   });
 
@@ -41,26 +50,73 @@ function Noticias() {
       <PageHero
         eyebrow="Central de Noticias"
         title="O que esta rolando na torcida."
-        subtitle="Esporte, impacto social, projetos comunitarios e bastidores das cidades parceiras - atualizado por IA, curado pelo time."
+        subtitle="Pautas coletadas de fontes publicas (RSS), curadas pelo time da Torcida Social — sem custo de IA paga."
       >
         <div className="mt-6 inline-flex items-center gap-2 bg-gold/15 border border-gold/40 text-navy text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full">
-          <Sparkles size={14} className="text-action" />
-          IA gera rascunhos 3 vezes ao dia
+          <Rss size={14} className="text-action" />
+          Atualizacao automatica 3x ao dia
         </div>
       </PageHero>
 
-      <section className="px-6 py-16 max-w-7xl mx-auto">
+      <section className="px-6 py-8 max-w-7xl mx-auto">
+        <div className="flex flex-wrap gap-2">
+          <TopicTab
+            active={activeTopic === "all"}
+            label="Todas"
+            onClick={() => setActiveTopic("all")}
+          />
+          {NEWS_TOPICS.map((topic) => (
+            <TopicTab
+              key={topic}
+              active={activeTopic === topic}
+              label={NEWS_TOPIC_LABELS[topic]}
+              onClick={() => setActiveTopic(topic)}
+            />
+          ))}
+        </div>
+        {activeTopic !== "all" && (
+          <p className="mt-4 text-sm text-navy/60 max-w-2xl">
+            {NEWS_TOPIC_DESCRIPTIONS[activeTopic]}
+          </p>
+        )}
+      </section>
+
+      <section className="px-6 pb-16 max-w-7xl mx-auto">
         {isLoading ? (
           <LoadingState />
         ) : news.length > 0 ? (
           <NewsGrid news={news} />
         ) : isError ? (
-          <PreviewGrid />
+          <PreviewGrid message="Nao foi possivel carregar as noticias publicadas. Exibindo destaques de exemplo." />
         ) : (
-          <PreviewGrid />
+          <PreviewGrid message="Ainda nao ha noticias aprovadas nesta categoria. O time pode gerar e publicar em /admin." />
         )}
       </section>
     </SiteLayout>
+  );
+}
+
+function TopicTab({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-4 py-2 rounded-full text-xs font-bold border transition-colors ${
+        active
+          ? "bg-navy text-background border-navy"
+          : "bg-card text-navy/65 border-navy/10 hover:border-action"
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 
@@ -100,7 +156,7 @@ function NewsGrid({ news }: { news: NewsDraft[] }) {
           {item.sources.length > 0 && (
             <div className="mt-5 pt-5 border-t border-navy/10 space-y-2">
               <p className="text-[11px] font-bold uppercase tracking-widest text-navy/50">
-                Fontes
+                Fonte
               </p>
               {item.sources.slice(0, 3).map((source) => (
                 <a
@@ -111,7 +167,7 @@ function NewsGrid({ news }: { news: NewsDraft[] }) {
                   className="flex items-center gap-2 text-xs font-bold text-action hover:text-action/80"
                 >
                   <ExternalLink size={12} />
-                  Ver fonte
+                  Ler na fonte original
                 </a>
               ))}
             </div>
@@ -136,35 +192,14 @@ function LoadingState() {
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="bg-card border border-navy/5 rounded-3xl p-10 text-center">
-      <Newspaper className="mx-auto text-action" size={34} />
-      <p className="mt-4 font-display text-2xl font-black">
-        Em breve, novidades.
-      </p>
-      <p className="mt-2 text-navy/60">
-        A central foi ativada agora. Noticias aprovadas aparecem aqui.
-      </p>
-    </div>
-  );
-}
-
-function PreviewGrid() {
+function PreviewGrid({ message }: { message: string }) {
   return (
     <div>
-      <div className="bg-gold/10 border border-gold/30 rounded-3xl p-6 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-widest text-action">
-            Curadoria inicial
-          </p>
-          <p className="text-sm font-bold text-navy mt-1">
-            Enquanto a IA gera e o time aprova novas pautas, estes destaques mantêm a central ativa.
-          </p>
-        </div>
-        <span className="text-xs font-black uppercase tracking-widest text-navy/50">
-          IA + curadoria
-        </span>
+      <div className="bg-gold/10 border border-gold/30 rounded-3xl p-6 mb-6">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-action">
+          Destaques de exemplo
+        </p>
+        <p className="text-sm font-bold text-navy mt-1">{message}</p>
       </div>
       <div className="grid md:grid-cols-3 gap-6">
         {NEWS.map((item) => (

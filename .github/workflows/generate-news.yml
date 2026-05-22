@@ -1,0 +1,24 @@
+name: Coletar noticias (3x ao dia)
+
+on:
+  schedule:
+    # 08:00, 14:00 e 20:00 em Sao Paulo (UTC-3)
+    - cron: "0 11,17,23 * * *"
+  workflow_dispatch:
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chamar funcao Supabase
+        env:
+          GENERATE_NEWS_SECRET: ${{ secrets.GENERATE_NEWS_SECRET }}
+          GENERATE_NEWS_FUNCTION_URL: ${{ secrets.GENERATE_NEWS_FUNCTION_URL }}
+        run: |
+          if [ -z "$GENERATE_NEWS_SECRET" ] || [ -z "$GENERATE_NEWS_FUNCTION_URL" ]; then
+            echo "Configure GENERATE_NEWS_SECRET e GENERATE_NEWS_FUNCTION_URL nos secrets do repositorio."
+            exit 1
+          fi
+          curl -fsS -X POST "$GENERATE_NEWS_FUNCTION_URL" \
+            -H "Content-Type: application/json" \
+            -H "x-generate-news-secret: $GENERATE_NEWS_SECRET"
