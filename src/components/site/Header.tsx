@@ -8,15 +8,14 @@ const NAV = [
   { to: "/", label: "Home" },
   { to: "/quem-somos", label: "Quem Somos" },
   { to: "/projetos", label: "Projetos" },
+  { to: "/torcida", label: "Arquibancada" },
+  { to: "/mao-na-massa", label: "Mão na Massa" },
   { to: "/doacoes", label: "Doações" },
   { to: "/ranking", label: "Ranking" },
   { to: "/area-crianca", label: "Área da Criança" },
   { to: "/integracao-neuroinclusiva", label: "NeuroInclusão" },
   { to: "/parceiros", label: "Parceiros" },
   { to: "/noticias", label: "Notícias" },
-
-  { to: "/mao-na-massa", label: "Mão na Massa" },
-
   { to: "/contato", label: "Contato" },
 ] as const;
 export function Header() {
