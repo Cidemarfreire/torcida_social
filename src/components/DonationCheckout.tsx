@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { createDonationCheckout, createPixDonation } from "@/lib/payments.functions";
 
 interface DonationCheckoutProps {
   amountInCents: number;
@@ -7,147 +6,205 @@ interface DonationCheckoutProps {
   returnUrl?: string;
 }
 
-export function DonationCheckout({ amountInCents, recurring, returnUrl }: DonationCheckoutProps) {
+export function DonationCheckout({
+  amountInCents,
+  recurring = false,
+}: DonationCheckoutProps) {
   const [email, setEmail] = useState("");
-  const [method, setMethod] = useState<"pix" | "checkout">(recurring ? "checkout" : "pix");
-  const [pix, setPix] = useState<{
-    qrCode?: string;
-    qrCodeBase64?: string;
-    ticketUrl?: string;
-    paymentId?: string | null;
-  } | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [pix, setPix] = useState<any>(null);
+  const [loadingStripe, setLoadingStripe] = useState(false);
+  const [loadingPix, setLoadingPix] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+  const amount = Math.max(5, Math.round(amountInCents / 100));
+
+  async function payWithStripe() {
+    setLoadingStripe(true);
+
     try {
-      if (!recurring && method === "pix") {
-        const res = await createPixDonation({
-          data: {
-            amountInCents,
+      const response = await fetch(
+        "https://yqmgtqtrpxoqbgpkdjcg.supabase.co/functions/v1/create-stripe-checkout",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount,
             customerEmail: email,
-          },
-        });
-
-        if (!res?.qrCode && !res?.qrCodeBase64 && !res?.ticketUrl) {
-          throw new Error("Pix gerado sem QR Code. Tente novamente.");
+            planName: recurring
+              ? "Doação Mensal Torcida Social"
+              : "Doação Torcida Social",
+            type: recurring ? "recurring_donation" : "donation",
+          }),
         }
+      );
 
-        setPix(res);
-        setLoading(false);
-        return;
+      const data = await response.json();
+
+      if (!response.ok || !data?.url) {
+        throw new Error(data?.error || "Erro ao iniciar pagamento Stripe");
       }
 
-      const res = await createDonationCheckout({
-        data: {
-          amountInCents,
-          recurring,
-          customerEmail: email || undefined,
-          returnUrl: returnUrl || `${window.location.origin}/doacoes/obrigado`,
-        },
-      });
-      if (!res?.url) throw new Error("Falha ao iniciar checkout");
-      window.location.href = res.url;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao processar pagamento");
-      setLoading(false);
+      window.location.href = data.url;
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Erro no cartão.");
+    } finally {
+      setLoadingStripe(false);
     }
-  };
+  }
+
+  async function payWithPix() {
+    setLoadingPix(true);
+    setPix(null);
+
+    try {
+      const response = await fetch(
+        "https://yqmgtqtrpxoqbgpkdjcg.supabase.co/functions/v1/create-mercadopago-pix",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount,
+            customerEmail: email,
+            customerName: "Doador Torcida Social",
+            planName: recurring
+              ? "Doação Mensal Torcida Social"
+              : "Doação Torcida Social",
+            type: recurring ? "recurring_donation" : "donation",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data?.qrCode) {
+        throw new Error(data?.error || "Erro ao gerar Pix");
+      }
+
+      setPix(data);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Erro ao gerar Pix.");
+    } finally {
+      setLoadingPix(false);
+    }
+  }
+
+  async function copyPix() {
+    if (!pix?.qrCode) return;
+    await navigator.clipboard.writeText(pix.qrCode);
+    alert("Código Pix copiado!");
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {!recurring && !pix && (
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => setMethod("pix")}
-            className={`py-3 rounded-xl border-2 font-black transition-colors ${method === "pix" ? "border-action bg-action/5 text-action" : "border-navy/10 text-navy/60"}`}
-          >
-            PIX
-          </button>
-          <button
-            type="button"
-            onClick={() => setMethod("checkout")}
-            className={`py-3 rounded-xl border-2 font-black transition-colors ${method === "checkout" ? "border-action bg-action/5 text-action" : "border-navy/10 text-navy/60"}`}
-          >
-            CARTÃO
-          </button>
-        </div>
-      )}
-
+    <div className="bg-card border border-navy/10 rounded-3xl p-6 space-y-5">
       <div>
-        <label className="block text-xs font-bold uppercase tracking-wider text-navy/50 mb-2">
-          E-mail {recurring || method === "pix" ? "(obrigatório)" : "(opcional, para o comprovante)"}
-        </label>
-        <input
-          type="email"
-          required={recurring || method === "pix"}
-          disabled={Boolean(pix)}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="seu@email.com"
-          className="w-full bg-surface border-2 border-navy/10 px-4 py-4 rounded-xl font-medium focus:border-action outline-none"
-        />
+        <p className="text-[11px] font-bold uppercase tracking-widest text-action">
+          Escolha a forma de pagamento
+        </p>
+
+        <h3 className="font-display text-2xl font-black mt-1">
+          Finalizar contribuição
+        </h3>
+
+        <p className="text-sm text-navy/60 mt-2">
+          Escolha entre cartão seguro via Stripe ou Pix via Mercado Pago.
+        </p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-          {error}
-        </div>
-      )}
+      <div className="bg-navy text-background rounded-2xl p-5">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-gold">
+          Valor selecionado
+        </p>
 
-      {pix ? (
-        <div className="bg-surface border border-navy/10 rounded-2xl p-5 space-y-4 text-center">
-          <p className="font-display text-xl font-black text-navy">PIX gerado</p>
+        <p className="font-display text-4xl font-black mt-2">
+          R$ {amount.toLocaleString("pt-BR")}
+        </p>
+
+        <p className="text-background/60 text-sm mt-1">
+          {recurring ? "Contribuição mensal" : "Contribuição única"}
+        </p>
+      </div>
+
+      <label className="block">
+        <span className="text-[11px] font-bold uppercase tracking-widest text-navy/60">
+          E-mail para confirmação
+        </span>
+
+        <input
+          type="email"
+          required
+          placeholder="seuemail@exemplo.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="mt-2 w-full border-2 border-navy/10 rounded-xl px-4 py-3 focus:border-action outline-none"
+        />
+      </label>
+
+      <div className="grid md:grid-cols-2 gap-3">
+        <button
+          type="button"
+          disabled={!email || loadingStripe || loadingPix}
+          onClick={payWithStripe}
+          className="w-full bg-gold text-navy py-4 rounded-2xl font-black hover:opacity-90 transition-opacity disabled:opacity-50"
+        >
+          {loadingStripe ? "ABRINDO STRIPE..." : "PAGAR COM CARTÃO"}
+        </button>
+
+        <button
+          type="button"
+          disabled={!email || loadingPix || loadingStripe}
+          onClick={payWithPix}
+          className="w-full bg-navy text-background py-4 rounded-2xl font-black hover:bg-action transition-colors disabled:opacity-50"
+        >
+          {loadingPix ? "GERANDO PIX..." : "PAGAR COM PIX"}
+        </button>
+      </div>
+
+      {pix?.qrCode && (
+        <div className="bg-surface border border-navy/10 rounded-2xl p-5 space-y-4">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-action">
+            Pix gerado com sucesso
+          </p>
+
           {pix.qrCodeBase64 && (
             <img
               src={`data:image/png;base64,${pix.qrCodeBase64}`}
               alt="QR Code Pix"
-              className="mx-auto w-56 h-56 rounded-xl bg-white p-2"
+              className="w-56 h-56 mx-auto rounded-xl border border-navy/10 bg-white p-3"
             />
           )}
-          {pix.qrCode && (
-            <div className="space-y-2">
-              <p className="text-xs font-bold uppercase tracking-wider text-navy/50">Pix copia e cola</p>
-              <textarea
-                readOnly
-                value={pix.qrCode}
-                className="w-full h-28 bg-card border-2 border-navy/10 rounded-xl p-3 text-xs"
-              />
-              <button
-                type="button"
-                onClick={() => navigator.clipboard.writeText(pix.qrCode || "")}
-                className="w-full bg-navy text-background py-3 rounded-xl font-black hover:bg-action transition-colors"
-              >
-                COPIAR CÓDIGO PIX
-              </button>
-            </div>
-          )}
+
+          <textarea
+            readOnly
+            value={pix.qrCode}
+            className="w-full h-28 bg-card border-2 border-navy/10 rounded-xl p-3 text-xs"
+          />
+
+          <button
+            type="button"
+            onClick={copyPix}
+            className="w-full bg-success text-background py-3 rounded-xl font-black hover:opacity-90 transition-opacity"
+          >
+            COPIAR CÓDIGO PIX
+          </button>
+
           {pix.ticketUrl && (
-            <a href={pix.ticketUrl} target="_blank" rel="noreferrer" className="block text-sm font-bold text-action underline">
+            <a
+              href={pix.ticketUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="block text-center text-sm font-bold text-action underline"
+            >
               Abrir pagamento no Mercado Pago
             </a>
           )}
-          <p className="text-[11px] text-navy/45">
-            Após o pagamento, a confirmação depende do webhook do Mercado Pago.
-          </p>
         </div>
-      ) : (
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-action text-background py-5 rounded-xl font-black text-lg hover:bg-navy transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {loading ? (method === "pix" && !recurring ? "Gerando Pix..." : "Redirecionando...") : method === "pix" && !recurring ? "GERAR PIX →" : "IR PARA O PAGAMENTO →"}
-        </button>
       )}
 
-      <p className="text-[11px] text-navy/40 text-center">
-        {recurring ? "Doações mensais são finalizadas no Mercado Pago." : "Você pode pagar com Pix direto no app ou cartão pelo Mercado Pago."}
+      <p className="text-xs text-navy/45 leading-relaxed">
+        Cartão processado com segurança pela Stripe. Pix processado via Mercado
+        Pago PJ.
       </p>
-    </form>
+    </div>
   );
 }
+
+export default DonationCheckout;

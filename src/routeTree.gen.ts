@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ValidarCarteirinhaRouteImport } from './routes/validar-carteirinha'
+import { Route as TorcidaRouteImport } from './routes/torcida'
 import { Route as TermosRouteImport } from './routes/termos'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as QuemSomosRouteImport } from './routes/quem-somos'
@@ -21,6 +22,7 @@ import { Route as NucleosRouteImport } from './routes/nucleos'
 import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as MuralRouteImport } from './routes/mural'
 import { Route as MeuImpactoRouteImport } from './routes/meu-impacto'
+import { Route as MaoNaMassaRouteImport } from './routes/mao-na-massa'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LgpdRouteImport } from './routes/lgpd'
 import { Route as IntegracaoNeuroinclusivaRouteImport } from './routes/integracao-neuroinclusiva'
@@ -34,6 +36,7 @@ import { Route as BeneficiosRouteImport } from './routes/beneficios'
 import { Route as AreaCriancaRouteImport } from './routes/area-crianca'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TSlugRouteImport } from './routes/t/$slug'
 import { Route as DoacoesObrigadoRouteImport } from './routes/doacoes.obrigado'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
 import { Route as AdminLojasRouteImport } from './routes/admin.lojas'
@@ -41,6 +44,11 @@ import { Route as AdminLojasRouteImport } from './routes/admin.lojas'
 const ValidarCarteirinhaRoute = ValidarCarteirinhaRouteImport.update({
   id: '/validar-carteirinha',
   path: '/validar-carteirinha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TorcidaRoute = TorcidaRouteImport.update({
+  id: '/torcida',
+  path: '/torcida',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermosRoute = TermosRouteImport.update({
@@ -96,6 +104,11 @@ const MuralRoute = MuralRouteImport.update({
 const MeuImpactoRoute = MeuImpactoRouteImport.update({
   id: '/meu-impacto',
   path: '/meu-impacto',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MaoNaMassaRoute = MaoNaMassaRouteImport.update({
+  id: '/mao-na-massa',
+  path: '/mao-na-massa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -164,6 +177,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TSlugRoute = TSlugRouteImport.update({
+  id: '/t/$slug',
+  path: '/t/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DoacoesObrigadoRoute = DoacoesObrigadoRouteImport.update({
   id: '/obrigado',
   path: '/obrigado',
@@ -194,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/integracao-neuroinclusiva': typeof IntegracaoNeuroinclusivaRoute
   '/lgpd': typeof LgpdRoute
   '/login': typeof LoginRoute
+  '/mao-na-massa': typeof MaoNaMassaRoute
   '/meu-impacto': typeof MeuImpactoRoute
   '/mural': typeof MuralRoute
   '/noticias': typeof NoticiasRoute
@@ -205,10 +224,12 @@ export interface FileRoutesByFullPath {
   '/quem-somos': typeof QuemSomosRoute
   '/ranking': typeof RankingRoute
   '/termos': typeof TermosRoute
+  '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
   '/admin/lojas': typeof AdminLojasRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/doacoes/obrigado': typeof DoacoesObrigadoRoute
+  '/t/$slug': typeof TSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -224,6 +245,7 @@ export interface FileRoutesByTo {
   '/integracao-neuroinclusiva': typeof IntegracaoNeuroinclusivaRoute
   '/lgpd': typeof LgpdRoute
   '/login': typeof LoginRoute
+  '/mao-na-massa': typeof MaoNaMassaRoute
   '/meu-impacto': typeof MeuImpactoRoute
   '/mural': typeof MuralRoute
   '/noticias': typeof NoticiasRoute
@@ -235,10 +257,12 @@ export interface FileRoutesByTo {
   '/quem-somos': typeof QuemSomosRoute
   '/ranking': typeof RankingRoute
   '/termos': typeof TermosRoute
+  '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
   '/admin/lojas': typeof AdminLojasRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/doacoes/obrigado': typeof DoacoesObrigadoRoute
+  '/t/$slug': typeof TSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -255,6 +279,7 @@ export interface FileRoutesById {
   '/integracao-neuroinclusiva': typeof IntegracaoNeuroinclusivaRoute
   '/lgpd': typeof LgpdRoute
   '/login': typeof LoginRoute
+  '/mao-na-massa': typeof MaoNaMassaRoute
   '/meu-impacto': typeof MeuImpactoRoute
   '/mural': typeof MuralRoute
   '/noticias': typeof NoticiasRoute
@@ -266,10 +291,12 @@ export interface FileRoutesById {
   '/quem-somos': typeof QuemSomosRoute
   '/ranking': typeof RankingRoute
   '/termos': typeof TermosRoute
+  '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
   '/admin/lojas': typeof AdminLojasRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/doacoes/obrigado': typeof DoacoesObrigadoRoute
+  '/t/$slug': typeof TSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -287,6 +314,7 @@ export interface FileRouteTypes {
     | '/integracao-neuroinclusiva'
     | '/lgpd'
     | '/login'
+    | '/mao-na-massa'
     | '/meu-impacto'
     | '/mural'
     | '/noticias'
@@ -298,10 +326,12 @@ export interface FileRouteTypes {
     | '/quem-somos'
     | '/ranking'
     | '/termos'
+    | '/torcida'
     | '/validar-carteirinha'
     | '/admin/lojas'
     | '/admin/notificacoes'
     | '/doacoes/obrigado'
+    | '/t/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -317,6 +347,7 @@ export interface FileRouteTypes {
     | '/integracao-neuroinclusiva'
     | '/lgpd'
     | '/login'
+    | '/mao-na-massa'
     | '/meu-impacto'
     | '/mural'
     | '/noticias'
@@ -328,10 +359,12 @@ export interface FileRouteTypes {
     | '/quem-somos'
     | '/ranking'
     | '/termos'
+    | '/torcida'
     | '/validar-carteirinha'
     | '/admin/lojas'
     | '/admin/notificacoes'
     | '/doacoes/obrigado'
+    | '/t/$slug'
   id:
     | '__root__'
     | '/'
@@ -347,6 +380,7 @@ export interface FileRouteTypes {
     | '/integracao-neuroinclusiva'
     | '/lgpd'
     | '/login'
+    | '/mao-na-massa'
     | '/meu-impacto'
     | '/mural'
     | '/noticias'
@@ -358,10 +392,12 @@ export interface FileRouteTypes {
     | '/quem-somos'
     | '/ranking'
     | '/termos'
+    | '/torcida'
     | '/validar-carteirinha'
     | '/admin/lojas'
     | '/admin/notificacoes'
     | '/doacoes/obrigado'
+    | '/t/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -378,6 +414,7 @@ export interface RootRouteChildren {
   IntegracaoNeuroinclusivaRoute: typeof IntegracaoNeuroinclusivaRoute
   LgpdRoute: typeof LgpdRoute
   LoginRoute: typeof LoginRoute
+  MaoNaMassaRoute: typeof MaoNaMassaRoute
   MeuImpactoRoute: typeof MeuImpactoRoute
   MuralRoute: typeof MuralRoute
   NoticiasRoute: typeof NoticiasRoute
@@ -389,7 +426,9 @@ export interface RootRouteChildren {
   QuemSomosRoute: typeof QuemSomosRoute
   RankingRoute: typeof RankingRoute
   TermosRoute: typeof TermosRoute
+  TorcidaRoute: typeof TorcidaRoute
   ValidarCarteirinhaRoute: typeof ValidarCarteirinhaRoute
+  TSlugRoute: typeof TSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -399,6 +438,13 @@ declare module '@tanstack/react-router' {
       path: '/validar-carteirinha'
       fullPath: '/validar-carteirinha'
       preLoaderRoute: typeof ValidarCarteirinhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/torcida': {
+      id: '/torcida'
+      path: '/torcida'
+      fullPath: '/torcida'
+      preLoaderRoute: typeof TorcidaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/termos': {
@@ -476,6 +522,13 @@ declare module '@tanstack/react-router' {
       path: '/meu-impacto'
       fullPath: '/meu-impacto'
       preLoaderRoute: typeof MeuImpactoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mao-na-massa': {
+      id: '/mao-na-massa'
+      path: '/mao-na-massa'
+      fullPath: '/mao-na-massa'
+      preLoaderRoute: typeof MaoNaMassaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -569,6 +622,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/t/$slug': {
+      id: '/t/$slug'
+      path: '/t/$slug'
+      fullPath: '/t/$slug'
+      preLoaderRoute: typeof TSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/doacoes/obrigado': {
       id: '/doacoes/obrigado'
       path: '/obrigado'
@@ -630,6 +690,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegracaoNeuroinclusivaRoute: IntegracaoNeuroinclusivaRoute,
   LgpdRoute: LgpdRoute,
   LoginRoute: LoginRoute,
+  MaoNaMassaRoute: MaoNaMassaRoute,
   MeuImpactoRoute: MeuImpactoRoute,
   MuralRoute: MuralRoute,
   NoticiasRoute: NoticiasRoute,
@@ -641,7 +702,9 @@ const rootRouteChildren: RootRouteChildren = {
   QuemSomosRoute: QuemSomosRoute,
   RankingRoute: RankingRoute,
   TermosRoute: TermosRoute,
+  TorcidaRoute: TorcidaRoute,
   ValidarCarteirinhaRoute: ValidarCarteirinhaRoute,
+  TSlugRoute: TSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

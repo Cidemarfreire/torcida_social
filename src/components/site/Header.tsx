@@ -14,9 +14,11 @@ const NAV = [
   { to: "/integracao-neuroinclusiva", label: "NeuroInclusão" },
   { to: "/parceiros", label: "Parceiros" },
   { to: "/noticias", label: "Notícias" },
+
+  { to: "/mao-na-massa", label: "Mão na Massa" },
+
   { to: "/contato", label: "Contato" },
 ] as const;
-
 export function Header() {
   const [open, setOpen] = useState(false);
   const { location } = useRouterState();

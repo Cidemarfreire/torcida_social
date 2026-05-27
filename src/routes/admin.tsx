@@ -1,45 +1,106 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
-import { STATS, RANKING, SERIE_A_CLUBS, formatBRL, formatInt } from "@/lib/mock-data";
-import { requireAdmin } from "@/lib/admin-guard";
+import { STATS, formatInt } from "@/lib/mock-data";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database, Tables } from "@/integrations/supabase/types";
 import { formatNewsDate, NEWS_TOPIC_LABELS } from "@/lib/news";
 import { generateNewsDraftsNow } from "@/lib/news.functions";
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: requireAdmin,
   component: Admin,
-  head: () => ({ meta: [
-    { title: "Administração — Torcida Social" },
-    { name: "description", content: "Painel administrativo com gestão de torcedores, doações e métricas em tempo real." },
-  ]}),
+  head: () => ({
+    meta: [{ title: "Administração — Torcida Social" }],
+  }),
 });
 
 function Admin() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [checkingAccess, setCheckingAccess] = useState(true);
+
+  useEffect(() => {
+    async function checkAccess() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        navigate({ to: "/login" });
+        return;
+      }
+
+      if (user.email !== "cidemarfaria@gmail.com") {
+        navigate({ to: "/" });
+        return;
+      }
+
+      setCheckingAccess(false);
+    }
+
+    checkAccess();
+  }, [navigate]);
+
   const { data: newsDrafts = [], isLoading: isLoadingNews } = useQuery({
     queryKey: ["admin-news-drafts"],
     queryFn: fetchNewsDrafts,
     retry: 1,
+    enabled: !checkingAccess,
   });
+
   const reviewNews = useMutation({
     mutationFn: updateNewsStatus,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-news-drafts"] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-news-drafts"] });
+      await queryClient.refetchQueries({ queryKey: ["admin-news-drafts"] });
+    },
+    onError: (error) => {
+      alert(error instanceof Error ? error.message : "Erro ao atualizar notícia");
+    },
   });
+
+  const deleteNews = useMutation({
+    mutationFn: deleteNewsDraft,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-news-drafts"] });
+      await queryClient.refetchQueries({ queryKey: ["admin-news-drafts"] });
+    },
+    onError: (error) => {
+      alert(error instanceof Error ? error.message : "Erro ao apagar notícia");
+    },
+  });
+
   const generateNews = useMutation({
     mutationFn: () => generateNewsDraftsNow(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-news-drafts"] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-news-drafts"] });
+      await queryClient.refetchQueries({ queryKey: ["admin-news-drafts"] });
+    },
+    onError: (error) => {
+      alert(error instanceof Error ? error.message : "Erro ao coletar notícias");
+    },
   });
+
+  if (checkingAccess) {
+    return (
+      <SiteLayout>
+        <section className="px-6 py-24 max-w-7xl mx-auto">
+          <p className="font-bold text-navy/60">
+            Verificando acesso administrativo...
+          </p>
+        </section>
+      </SiteLayout>
+    );
+  }
 
   return (
     <SiteLayout>
       <PageHero
-        eyebrow="Administração · IA"
+        eyebrow="Administração · Torcida Social"
         title="Painel de controle."
-        subtitle="Gestão de torcedores, crianças, pagamentos, núcleos e parceiros. Métricas e sugestões com inteligência artificial."
+        subtitle="Gestão de notícias, métricas, torcedores, campanhas e ações da plataforma."
       />
 
       <section className="px-6 py-12 max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -49,179 +110,182 @@ function Admin() {
         <Card label="Núcleos" value="8" delta="+1 mês" />
       </section>
 
-      <section className="px-6 max-w-7xl mx-auto grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-card border border-navy/5 rounded-3xl p-7">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="font-display text-xl font-black">Arrecadação semanal</h2>
-            <span className="text-xs font-bold text-success">+18% vs semana anterior</span>
-          </div>
-          <div className="h-56 flex items-end gap-2">
-            {[35, 48, 42, 60, 55, 70, 85].map((v, i) => (
-              <div key={i} className="flex-1 bg-gradient-to-t from-action to-success rounded-t-lg" style={{ height: `${v}%` }} />
-            ))}
-          </div>
-          <div className="grid grid-cols-7 mt-3 text-[10px] font-bold text-navy/40 text-center uppercase">
-            {["seg", "ter", "qua", "qui", "sex", "sáb", "dom"].map((d) => <span key={d}>{d}</span>)}
-          </div>
-        </div>
-
-        <div className="bg-navy text-background rounded-3xl p-7">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-gold mb-2">IA · Sugestão</p>
-          <h3 className="font-display text-xl font-black leading-tight">Ative campanha relâmpago no Sudeste em parceria com clubes paulistas.</h3>
-          <p className="text-background/70 text-sm mt-3">Detectamos crescimento de 32% em torcedores PAL/SPFC nos últimos 7 dias.</p>
-          <button className="mt-5 bg-gold text-navy px-5 py-3 rounded-xl font-bold text-sm">Criar campanha</button>
-        </div>
-      </section>
-
-      <section className="px-6 pt-12 pb-24 max-w-7xl mx-auto">
+      <section className="px-6 pt-4 pb-24 max-w-7xl mx-auto">
         <div className="bg-card border border-navy/5 rounded-3xl overflow-hidden mb-8">
-          <div className="px-6 py-4 border-b border-navy/5 flex justify-between items-center">
+          <div className="px-6 py-5 border-b border-navy/5 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-action">
-                RSS - Curadoria
-              </p>
               <h2 className="font-display text-xl font-black">
-                Rascunhos de noticias
+                RSS · Curadoria
               </h2>
+              <p className="text-sm text-navy/60 mt-1">
+                Prioridade para Brasileirão, clubes da Série A, Seleção Brasileira,
+                Copa do Mundo e esporte social.
+              </p>
             </div>
-            <span className="text-xs font-bold text-navy/50">
-              {isLoadingNews ? "Carregando..." : `${newsDrafts.length} item(ns)`}
-            </span>
-          </div>
-          <div className="px-6 py-4 border-b border-navy/5 flex flex-wrap gap-3 items-center justify-between">
-            <p className="text-sm text-navy/60">
-              Coleta pautas gratis via RSS (Google News) — 3 temas, sem API paga de IA.
-              Agendamento: GitHub Actions 08h, 14h e 20h (SP).
-            </p>
+
             <button
+              type="button"
               onClick={() => generateNews.mutate()}
               disabled={generateNews.isPending}
-              className="bg-action text-background px-5 py-3 rounded-xl text-xs font-bold disabled:opacity-50"
+              className="bg-navy text-background px-5 py-3 rounded-xl font-black text-sm hover:bg-action transition-colors disabled:opacity-50"
             >
-              {generateNews.isPending ? "Coletando..." : "Coletar noticias agora"}
+              {generateNews.isPending ? "Coletando..." : "Coletar notícias agora"}
             </button>
           </div>
-          {generateNews.isError && (
-            <div className="px-6 py-3 bg-red-50 border-b border-red-100 text-sm font-bold text-red-700">
-              {generateNews.error instanceof Error ? generateNews.error.message : "Falha ao coletar noticias"}
+
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="font-display text-lg font-black">
+                Rascunhos de notícias
+              </h3>
+              <span className="text-xs font-bold text-navy/50">
+                {newsDrafts.length} item(ns)
+              </span>
             </div>
-          )}
-          {generateNews.isSuccess && (
-            <div className="px-6 py-3 bg-success/10 border-b border-success/20 text-sm font-bold text-success">
-              Coleta concluida. Novos rascunhos: {generateNews.data?.inserted ?? 0}
-            </div>
-          )}
-          {newsDrafts.length === 0 ? (
-            <div className="p-6 text-sm text-navy/60">
-              Nenhum rascunho encontrado. A funcao agendada cria novos itens em
-              `news_drafts`.
-            </div>
-          ) : (
-            <div className="divide-y divide-navy/5">
-              {newsDrafts.map((item) => (
-                <div
-                  key={item.id}
-                  className="grid lg:grid-cols-[1fr_280px] gap-4 px-6 py-5"
-                >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2 text-xs mb-2">
-                      <span className="bg-action/10 text-action font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                        {NEWS_TOPIC_LABELS[item.topic]}
-                      </span>
-                      <span className="text-navy/40 font-bold">
-                        {formatNewsDate(item.created_at)}
-                      </span>
-                      <span className="text-navy/40 font-bold uppercase">
-                        {item.status}
-                      </span>
+
+            {isLoadingNews ? (
+              <p className="text-sm font-bold text-navy/60">
+                Carregando notícias...
+              </p>
+            ) : newsDrafts.length === 0 ? (
+              <p className="text-sm text-navy/60">
+                Nenhum rascunho encontrado. Clique em “Coletar notícias agora”.
+              </p>
+            ) : (
+              <div className="grid gap-5">
+                {newsDrafts.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-surface border border-navy/5 rounded-3xl p-5 grid lg:grid-cols-[220px_1fr_auto] gap-5"
+                  >
+                    <div>
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.title}
+                          className="w-full h-40 object-cover rounded-2xl border border-navy/10 bg-card"
+                        />
+                      ) : (
+                        <div className="w-full h-40 rounded-2xl bg-navy/10 grid place-items-center text-xs font-bold text-navy/50">
+                          Sem imagem
+                        </div>
+                      )}
                     </div>
-                    <h3 className="font-display text-lg font-black leading-tight">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-navy/65 mt-2 leading-relaxed">
-                      {item.summary}
-                    </p>
-                    {item.social_relevance && (
-                      <p className="text-sm text-navy/65 mt-3 leading-relaxed">
-                        <strong className="text-navy">Impacto social: </strong>
-                        {item.social_relevance}
+
+                    <div>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="bg-gold/15 text-navy px-3 py-1 rounded-full text-[10px] font-black uppercase">
+                          {NEWS_TOPIC_LABELS[item.topic] || item.topic}
+                        </span>
+
+                        <span className="bg-navy/10 text-navy px-3 py-1 rounded-full text-[10px] font-black uppercase">
+                          {item.status}
+                        </span>
+
+                        <span className="text-[10px] font-bold text-navy/40 uppercase py-1">
+                          {formatNewsDate(item.created_at)}
+                        </span>
+                      </div>
+
+                      <h4 className="font-display text-xl font-black leading-tight">
+                        {item.title}
+                      </h4>
+
+                      <p className="text-sm text-navy/70 mt-3 leading-relaxed">
+                        {item.summary}
                       </p>
-                    )}
-                    {item.call_to_action && (
-                      <p className="text-sm font-bold text-action mt-3">
+
+                      <p className="text-sm text-navy/60 mt-3 leading-relaxed">
+                        <strong>Impacto social:</strong> {item.social_relevance}
+                      </p>
+
+                      <p className="text-sm text-action font-bold mt-3">
                         {item.call_to_action}
                       </p>
-                    )}
-                    {item.sources.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {item.sources.slice(0, 3).map((source, index) => (
-                          <a
-                            key={source}
-                            href={source}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs font-bold text-action underline"
-                          >
-                            Fonte {index + 1}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap lg:justify-end items-start gap-2">
-                    <button
-                      onClick={() =>
-                        reviewNews.mutate({ id: item.id, status: "approved" })
-                      }
-                      disabled={reviewNews.isPending}
-                      className="bg-success text-background px-4 py-2 rounded-xl text-xs font-bold"
-                    >
-                      Aprovar
-                    </button>
-                    <button
-                      onClick={() =>
-                        reviewNews.mutate({ id: item.id, status: "published" })
-                      }
-                      disabled={reviewNews.isPending}
-                      className="bg-action text-background px-4 py-2 rounded-xl text-xs font-bold"
-                    >
-                      Publicar
-                    </button>
-                    <button
-                      onClick={() =>
-                        reviewNews.mutate({ id: item.id, status: "rejected" })
-                      }
-                      disabled={reviewNews.isPending}
-                      className="bg-navy/10 text-navy px-4 py-2 rounded-xl text-xs font-bold"
-                    >
-                      Rejeitar
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        <div className="bg-card border border-navy/5 rounded-3xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-navy/5 flex justify-between items-center">
-            <h2 className="font-display text-xl font-black">Top clubes — performance</h2>
-            <button className="text-xs font-bold text-action">Exportar CSV</button>
-          </div>
-          {RANKING.slice(0, 5).map((row, i) => {
-            const club = SERIE_A_CLUBS.find((c) => c.id === row.clubId)!;
-            return (
-              <div key={club.id} className="grid grid-cols-[40px_1fr_120px_140px] gap-4 px-6 py-4 border-b border-navy/5 last:border-0 items-center text-sm">
-                <span className="font-display font-black text-navy/40">{i + 1}º</span>
-                <span className="font-bold">{club.name}</span>
-                <span className="text-right">{formatInt(row.donors)} doadores</span>
-                <span className="text-right font-display font-black text-action">{formatBRL(row.raised)}</span>
+                      {item.sources?.[0] && (
+                        <a
+                          href={item.sources[0]}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-block mt-3 text-xs font-black text-navy underline"
+                        >
+                          Fonte 1
+                        </a>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap lg:flex-col gap-2 lg:min-w-28">
+                      <button
+                        onClick={() =>
+                          reviewNews.mutate({ id: item.id, status: "approved" })
+                        }
+                        disabled={reviewNews.isPending || deleteNews.isPending}
+                        className="bg-success text-background px-4 py-2 rounded-xl text-xs font-bold"
+                      >
+                        Aprovar
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          reviewNews.mutate({ id: item.id, status: "published" })
+                        }
+                        disabled={reviewNews.isPending || deleteNews.isPending}
+                        className="bg-action text-background px-4 py-2 rounded-xl text-xs font-bold"
+                      >
+                        Publicar
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          reviewNews.mutate({ id: item.id, status: "rejected" })
+                        }
+                        disabled={reviewNews.isPending || deleteNews.isPending}
+                        className="bg-navy/10 text-navy px-4 py-2 rounded-xl text-xs font-bold"
+                      >
+                        Rejeitar
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          if (confirm("Tem certeza que deseja apagar esta notícia?")) {
+                            deleteNews.mutate(item.id);
+                          }
+                        }}
+                        disabled={reviewNews.isPending || deleteNews.isPending}
+                        className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold"
+                      >
+                        Apagar
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            );
-          })}
+            )}
+          </div>
         </div>
       </section>
     </SiteLayout>
+  );
+}
+
+function Card({
+  label,
+  value,
+  delta,
+}: {
+  label: string;
+  value: string | number;
+  delta: string;
+}) {
+  return (
+    <div className="bg-card border border-navy/5 rounded-2xl p-6 shadow-sm">
+      <p className="text-[11px] font-bold uppercase tracking-widest text-navy/50">
+        {label}
+      </p>
+      <p className="font-display text-3xl font-black mt-1 text-navy">{value}</p>
+      <p className="text-xs font-bold text-success mt-2">{delta}</p>
+    </div>
   );
 }
 
@@ -233,47 +297,30 @@ async function fetchNewsDrafts() {
     .from("news_drafts")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(80);
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 
-  return data ?? [];
+  return (data || []) as NewsDraft[];
 }
 
 async function updateNewsStatus({
   id,
   status,
 }: {
-  id: NewsDraft["id"];
+  id: string;
   status: NewsStatus;
 }) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const now = new Date().toISOString();
   const { error } = await supabase
     .from("news_drafts")
-    .update({
-      status,
-      reviewed_at: now,
-      reviewed_by: user?.id ?? null,
-      published_at: status === "published" ? now : null,
-    })
+    .update({ status })
     .eq("id", id);
 
-  if (error) {
-    throw error;
-  }
+  if (error) throw error;
 }
 
-function Card({ label, value, delta }: { label: string; value: string; delta: string }) {
-  return (
-    <div className="bg-card border border-navy/5 rounded-2xl p-6">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-navy/50">{label}</p>
-      <p className="font-display text-3xl font-black mt-2">{value}</p>
-      <p className="text-xs font-bold text-success mt-1">{delta}</p>
-    </div>
-  );
+async function deleteNewsDraft(id: string) {
+  const { error } = await supabase.from("news_drafts").delete().eq("id", id);
+
+  if (error) throw error;
 }

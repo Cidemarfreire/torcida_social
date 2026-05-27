@@ -50,11 +50,11 @@ function Noticias() {
       <PageHero
         eyebrow="Central de Noticias"
         title="O que esta rolando na torcida."
-        subtitle="Pautas coletadas de fontes publicas (RSS), curadas pelo time da Torcida Social — sem custo de IA paga."
+        subtitle="Notícias, histórias e movimentos do esporte que inspiram solidariedade, inclusão e transformação social."
       >
         <div className="mt-6 inline-flex items-center gap-2 bg-gold/15 border border-gold/40 text-navy text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full">
           <Rss size={14} className="text-action" />
-          Atualizacao automatica 3x ao dia
+          Paixão que informa. Torcida que transforma.
         </div>
       </PageHero>
 
@@ -95,7 +95,6 @@ function Noticias() {
     </SiteLayout>
   );
 }
-
 function TopicTab({
   active,
   label,
@@ -136,9 +135,13 @@ function NewsGrid({ news }: { news: NewsDraft[] }) {
               {formatNewsDate(item.published_at ?? item.created_at)}
             </span>
           </div>
-          <h2 className="font-display text-xl font-black mt-4 leading-tight">
-            {item.title}
-          </h2>
+          {item.image_url && (
+  <img
+    src={item.image_url}
+    alt={item.title}
+    className="w-full h-56 object-cover rounded-2xl mb-4 border border-navy/10"
+  />
+)}
           <p className="text-navy/65 text-sm mt-3 leading-relaxed">
             {item.summary}
           </p>
@@ -219,6 +222,34 @@ function PreviewGrid({ message }: { message: string }) {
             <p className="text-navy/65 text-sm mt-3 leading-relaxed">
               {item.excerpt}
             </p>
+            <div className="mt-5 flex flex-wrap gap-2">
+  <a
+    href={`https://wa.me/?text=${encodeURIComponent(item.title + " - https://www.multplen.com.br/noticias")}`}
+    target="_blank"
+    rel="noreferrer"
+    className="bg-green-600 text-white px-3 py-2 rounded-xl text-xs font-bold"
+  >
+    WhatsApp
+  </a>
+
+  <a
+    href={`mailto:?subject=${encodeURIComponent(item.title)}&body=${encodeURIComponent(item.summary + "\n\nLeia em: https://www.multplen.com.br/noticias")}`}
+    className="bg-navy text-background px-3 py-2 rounded-xl text-xs font-bold"
+  >
+    Email
+  </a>
+
+  <button
+    onClick={() => navigator.share?.({
+      title: item.title,
+      text: item.summary,
+      url: "https://www.multplen.com.br/noticias",
+    })}
+    className="bg-action text-background px-3 py-2 rounded-xl text-xs font-bold"
+  >
+    Compartilhar
+  </button>
+</div>
           </article>
         ))}
       </div>

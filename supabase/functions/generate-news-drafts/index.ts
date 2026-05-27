@@ -1,147 +1,314 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.105.4";
-
-type NewsTopic = "social_sports" | "selecao_brasileira" | "copa";
-
-type RssItem = {
-  title: string;
-  summary: string;
-  link: string;
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type NewsDraftRow = {
-  slug: string;
+type NewsDraft = {
+  topic: string;
+  status: "draft";
   title: string;
   summary: string;
   social_relevance: string;
   call_to_action: string;
   sources: string[];
-  topic: NewsTopic;
-  status: "draft";
-  generated_by: string;
+  image_url?: string | null;
 };
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-generate-news-secret",
-};
+const FALLBACK_IMAGE =
+  "https://www.multplen.com.br/assets/hero-torcida-CS-SmjMq.jpg";
 
-const TOPIC_CONFIG: Record<
-  NewsTopic,
-  { query: string; relevance: string; cta: string }
-> = {
-  social_sports: {
-    query: "esporte impacto social brasil ONG comunidade",
-    relevance:
-      "Mostra como o futebol e o esporte ampliam educacao, inclusao e apoio a familias em vulnerabilidade — o coracao da Torcida Social.",
-    cta: "Convide sua torcida a apoiar um nucleo ou projeto social pelo app.",
-  },
-  selecao_brasileira: {
-    query: "selecao brasileira copa do mundo 2026",
-    relevance:
-      "A Selecao mobiliza o pais e abre espaco para campanhas de solidariedade ligadas ao futebol.",
-    cta: "Use a energia da Selecao para engajar torcedores em doacoes e acoes sociais.",
-  },
-  copa: {
-    query: "futebol noticias mundo esportes internacional",
-    relevance:
-      "O cenario global do esporte inspira torcidas e parceiros a ampliar o impacto social no Brasil.",
-    cta: "Compartilhe na central de noticias e convide apoiadores para a Liga da Solidariedade.",
-  },
-};
+const SERIE_A_CLUBS = [
+  "Flamengo",
+  "Fluminense",
+  "Vasco",
+  "Botafogo",
+  "Palmeiras",
+  "Corinthians",
+  "São Paulo",
+  "Santos",
+  "Cruzeiro",
+  "Atlético Mineiro",
+  "Grêmio",
+  "Internacional",
+  "Bahia",
+  "Vitória",
+  "Fortaleza",
+  "Athletico Paranaense",
+  "Coritiba",
+  "Red Bull Bragantino",
+  "Remo",
+  "Chapecoense",
+];
 
-function slugify(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    .slice(0, 72);
+const NEWS_QUERIES = [
+  {
+    topic: "selecao_brasileira",
+    label: "Seleção Brasileira",
+    query: '"Seleção Brasileira" futebol Brasil Copa do Mundo 2026',
+  },
+  {
+    topic: "copa",
+    label: "Copa do Mundo",
+    query: '"Copa do Mundo 2026" Brasil "Seleção Brasileira"',
+  },
+  {
+    topic: "mundo_esportes",
+    label: "Brasileirão Série A",
+    query: `"Brasileirão Série A" Brasil futebol ${SERIE_A_CLUBS.join(" OR ")}`,
+  },
+  {
+    topic: "social_sports",
+    label: "Esporte social",
+    query: '"projetos sociais" futebol Brasil OR "esporte social" Brasil',
+  },
+  ...SERIE_A_CLUBS.map((club) => ({
+    topic: "mundo_esportes",
+    label: club,
+    query: `"${club}" "Brasileirão" futebol Brasil`,
+  })),
+];
+
+function jsonResponse(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
 }
 
-function decodeXml(text: string) {
-  return text
-    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+function stripHtml(value: string) {
+  return value
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/<[^>]+>/g, "")
+    .replace(/&quot;/g, '"')
     .trim();
 }
 
-function extractTag(block: string, tag: string) {
-  const match = block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i"));
-  return match ? decodeXml(match[1]) : "";
+function extractTag(item: string, tag: string) {
+  const regex = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i");
+  const match = item.match(regex);
+  return match?.[1]?.trim() || "";
 }
 
-function parseRss(xml: string, limit = 2): RssItem[] {
-  const items: RssItem[] = [];
-  const blocks = xml.match(/<item[\s\S]*?<\/item>/gi) ?? [];
+function extractCdata(value: string) {
+  return value.replace(/^<!\[CDATA\[/, "").replace(/\]\]>$/, "").trim();
+}
 
-  for (const block of blocks) {
-    const title = extractTag(block, "title");
-    const link = extractTag(block, "link");
-    const summary =
-      extractTag(block, "description") ||
-      extractTag(block, "content:encoded") ||
-      extractTag(block, "summary");
+function extractImage(item: string) {
+  const media =
+    item.match(/<media:content[^>]+url="([^"]+)"/i) ||
+    item.match(/<media:thumbnail[^>]+url="([^"]+)"/i) ||
+    item.match(/<enclosure[^>]+url="([^"]+)"/i);
 
-    if (!title || !link) continue;
+  if (media?.[1]) return media[1];
 
-    items.push({
-      title: title.slice(0, 200),
-      summary: (summary || title).slice(0, 500),
-      link,
-    });
+  const description = extractTag(item, "description");
+  const img = description.match(/<img[^>]+src="([^"]+)"/i);
 
-    if (items.length >= limit) break;
-  }
+  return img?.[1] || null;
+}
 
-  return items;
+function normalizeTitle(title: string) {
+  return stripHtml(title)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function googleNewsRssUrl(query: string) {
-  const q = encodeURIComponent(query);
-  return `https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt`;
+  return `https://news.google.com/rss/search?q=${encodeURIComponent(
+    query
+  )}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
 }
 
-async function fetchTopicItems(topic: NewsTopic): Promise<RssItem[]> {
-  const { query } = TOPIC_CONFIG[topic];
-  const response = await fetch(googleNewsRssUrl(query), {
-    headers: { "User-Agent": "TorcidaSocialNewsBot/1.0" },
+function hasBrazilFocus(title: string, summary: string) {
+  const text = `${title} ${summary}`.toLowerCase();
+
+  const brazilTerms = [
+    "brasil",
+    "brasileira",
+    "brasileiro",
+    "seleção brasileira",
+    "cbf",
+    "brasileirão",
+    "série a",
+    "serie a",
+    ...SERIE_A_CLUBS.map((c) => c.toLowerCase()),
+  ];
+
+  const foreignOnlyTerms = [
+    "espanha",
+    "frança",
+    "inglaterra",
+    "portugal",
+    "alemanha",
+    "itália",
+    "argentina",
+    "luis de la fuente",
+    "lamine yamal",
+  ];
+
+  const hasBrazil = brazilTerms.some((term) => text.includes(term));
+  const foreignOnly =
+    foreignOnlyTerms.some((term) => text.includes(term)) && !hasBrazil;
+
+  return hasBrazil && !foreignOnly;
+}
+
+function scoreNews(title: string, summary: string, label: string) {
+  const text = `${title} ${summary}`.toLowerCase();
+  let score = 0;
+
+  if (text.includes(label.toLowerCase())) score += 30;
+  if (text.includes("brasileirão")) score += 25;
+  if (text.includes("série a") || text.includes("serie a")) score += 20;
+  if (text.includes("seleção brasileira")) score += 25;
+  if (text.includes("copa do mundo")) score += 20;
+  if (text.includes("cbf")) score += 15;
+  if (text.includes("convocação")) score += 15;
+  if (text.includes("projeto social")) score += 15;
+  if (text.includes("inclusão")) score += 10;
+  if (text.includes("crianças")) score += 10;
+
+  for (const club of SERIE_A_CLUBS) {
+    if (text.includes(club.toLowerCase())) score += 18;
+  }
+
+  return score;
+}
+
+function buildSocialRelevance(topic: string) {
+  if (topic === "selecao_brasileira") {
+    return "A Seleção Brasileira mobiliza milhões de torcedores e abre espaço para campanhas solidárias ligadas ao futebol.";
+  }
+
+  if (topic === "copa") {
+    return "A Copa do Mundo aumenta o engajamento nacional e pode impulsionar ações sociais conectadas à paixão pelo futebol.";
+  }
+
+  if (topic === "social_sports") {
+    return "Mostra como o esporte pode gerar inclusão, educação, pertencimento e transformação social.";
+  }
+
+  return "O Brasileirão e os clubes da Série A mobilizam torcidas em todo o país, fortalecendo campanhas de impacto social.";
+}
+
+function buildCallToAction(topic: string) {
+  if (topic === "social_sports") {
+    return "Convide sua torcida a apoiar um núcleo social pelo app.";
+  }
+
+  if (topic === "selecao_brasileira" || topic === "copa") {
+    return "Use a força da Seleção para engajar torcedores em doações e ações sociais.";
+  }
+
+  return "Compartilhe essa pauta e fortaleça a Torcida Social com seu clube do coração.";
+}
+
+async function fetchRssItems(queryConfig: typeof NEWS_QUERIES[number]) {
+  const response = await fetch(googleNewsRssUrl(queryConfig.query), {
+    headers: { "User-Agent": "TorcidaSocialBot/1.0" },
   });
 
   if (!response.ok) {
-    throw new Error(`RSS ${topic}: HTTP ${response.status}`);
+    throw new Error(`RSS ${queryConfig.label}: HTTP ${response.status}`);
   }
 
-  return parseRss(await response.text(), 2);
+  const xml = await response.text();
+
+  const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].map(
+    (match) => match[1]
+  );
+
+  return items
+    .map((item) => {
+      const title = stripHtml(extractCdata(extractTag(item, "title")));
+      const summary = stripHtml(extractCdata(extractTag(item, "description")));
+      const source = extractCdata(extractTag(item, "link"));
+      const image_url = extractImage(item) || FALLBACK_IMAGE;
+
+      return {
+        title,
+        summary,
+        source,
+        image_url,
+        score: scoreNews(title, summary, queryConfig.label),
+      };
+    })
+    .filter((item) => item.title && item.source)
+    .filter((item) => hasBrazilFocus(item.title, item.summary))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 1)
+    .map(
+      (item): NewsDraft => ({
+        topic: queryConfig.topic,
+        status: "draft",
+        title: item.title,
+        summary: item.summary || item.title,
+        social_relevance: buildSocialRelevance(queryConfig.topic),
+        call_to_action: buildCallToAction(queryConfig.topic),
+        sources: [item.source],
+        image_url: item.image_url || FALLBACK_IMAGE,
+      })
+    );
 }
 
-function toDraftRows(
-  topic: NewsTopic,
-  items: RssItem[],
-  dateKey: string,
-): NewsDraftRow[] {
-  const config = TOPIC_CONFIG[topic];
+async function insertNewsDrafts(news: NewsDraft[]) {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-  return items.map((item, index) => {
-    const base = slugify(item.title) || `noticia-${topic}-${index}`;
-    return {
-      slug: `${base}-${dateKey}-${topic}`,
-      title: item.title,
-      summary: item.summary,
-      social_relevance: config.relevance,
-      call_to_action: config.cta,
-      sources: [item.link],
-      topic,
-      status: "draft" as const,
-      generated_by: "rss-google-news",
-    };
-  });
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY não configurados");
+  }
+
+  let inserted = 0;
+
+  for (const item of news) {
+    const normalizedTitle = normalizeTitle(item.title);
+
+    const checkUrl =
+      `${supabaseUrl}/rest/v1/news_drafts?select=id,title`;
+
+    const existingResponse = await fetch(checkUrl, {
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+      },
+    });
+
+    const existingData = await existingResponse.json().catch(() => []);
+
+    const alreadyExists =
+      Array.isArray(existingData) &&
+      existingData.some(
+        (row) => normalizeTitle(String(row.title || "")) === normalizedTitle
+      );
+
+    if (alreadyExists) continue;
+
+    const insertResponse = await fetch(`${supabaseUrl}/rest/v1/news_drafts`, {
+      method: "POST",
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(item),
+    });
+
+    if (!insertResponse.ok) {
+      const errorText = await insertResponse.text();
+      throw new Error(`Erro ao inserir notícia: ${errorText}`);
+    }
+
+    inserted += 1;
+  }
+
+  return inserted;
 }
 
 Deno.serve(async (req) => {
@@ -150,84 +317,38 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const functionSecret = Deno.env.get("GENERATE_NEWS_SECRET");
-    if (
-      functionSecret &&
-      req.headers.get("x-generate-news-secret") !== functionSecret
-    ) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
-    }
-
-    const dateKey = new Date()
-      .toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })
-      .split("/")
-      .reverse()
-      .join("");
-
-    const topics = Object.keys(TOPIC_CONFIG) as NewsTopic[];
-    const results = await Promise.allSettled(
-      topics.map((topic) => fetchTopicItems(topic)),
-    );
-
-    const rows: NewsDraftRow[] = [];
+    const collected: NewsDraft[] = [];
     const errors: string[] = [];
 
-    for (let i = 0; i < topics.length; i++) {
-      const topic = topics[i];
-      const result = results[i];
-      if (result.status === "fulfilled") {
-        rows.push(...toDraftRows(topic, result.value, dateKey));
-      } else {
-        errors.push(
-          `${topic}: ${result.reason instanceof Error ? result.reason.message : "erro"}`,
-        );
+    for (const queryConfig of NEWS_QUERIES) {
+      try {
+        const items = await fetchRssItems(queryConfig);
+        collected.push(...items);
+      } catch (error) {
+        errors.push(error instanceof Error ? error.message : String(error));
       }
     }
 
-    if (rows.length === 0) {
-      throw new Error(
-        errors.length > 0
-          ? `Nenhuma noticia coletada. ${errors.join("; ")}`
-          : "Nenhuma noticia coletada dos feeds.",
-      );
-    }
+    const uniqueByTitle = Array.from(
+      new Map(collected.map((item) => [normalizeTitle(item.title), item])).values()
+    ).slice(0, 30);
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const { error } = await supabase
-      .from("news_drafts")
-      .upsert(rows, { onConflict: "slug", ignoreDuplicates: true });
+    const inserted = await insertNewsDrafts(uniqueByTitle);
 
-    if (error) {
-      throw error;
-    }
-
-    return new Response(
-      JSON.stringify({
-        inserted: rows.length,
-        source: "rss-google-news",
-        warnings: errors.length > 0 ? errors : undefined,
-      }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    return jsonResponse({
+      success: true,
+      inserted,
+      collected: uniqueByTitle.length,
+      source: "rss-serie-a-selecao-copa-com-imagem-fallback",
+      errors,
+    });
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
+    return jsonResponse(
       {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        success: false,
+        error: error instanceof Error ? error.message : "Erro desconhecido",
       },
+      500
     );
   }
 });
