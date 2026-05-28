@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { NavigationActions } from "@/components/site/NavigationActions";
+// Arquibancada Digital Premium
+
 import {
-    // Arquibancada Digital Premium
   Heart,
   MessageCircle,
   Share2,
@@ -15,7 +18,6 @@ import {
   Sparkles,
   Music2,
 } from "lucide-react";
-
 export const Route = createFileRoute("/torcida")({
   component: TorcidaPage,
 });
@@ -91,27 +93,81 @@ const initialMessages = [
 ];
 
 function TorcidaPage() {
-  const [messages, setMessages] = useState(initialMessages);
+  const [messages, setMessages] = useState<any[]>([]);
+  useEffect(() => {
+  loadMessages();
+}, []);
+
+async function loadMessages() {
+  const { data, error } = await supabase
+  .from("torcida_mural")
+  .select("*")
+  .eq("status", "approved")
+  .order("created_at", { ascending: false });
+
+  if (!error && data) {
+    setMessages(data);
+  }
+}
   const [name, setName] = useState("");
   const [team, setTeam] = useState("");
   const [text, setText] = useState("");
 
-  function handleSendMessage() {
-    if (!name.trim() || !text.trim()) return;
+  async function handleSendMessage() {
+  if (!name.trim() || !text.trim()) return;
 
-    setMessages([
-      {
-        name: name.trim(),
-        team: team.trim() || "Torcida Social",
-        text: text.trim(),
-      },
-      ...messages,
-    ]);
+const forbiddenWords = [
+  "palavrão1",
+  "palavrão2",
+  "xingamento",
+  "ofensa",
+];
 
+const lowerMessage = text.toLowerCase();
+
+const hasForbiddenWord = forbiddenWords.some((word) =>
+  lowerMessage.includes(word)
+);
+
+if (hasForbiddenWord) {
+  alert("Mensagem bloqueada pela moderação.");
+  return;
+}
+
+if (text.length > 300) {
+  alert("Mensagem muito longa.");
+  return;
+}
+
+if (text.includes("http://") || text.includes("https://")) {
+  alert("Links não são permitidos.");
+  return;
+}
+
+const repeatedChars = /(.)\1{7,}/;
+
+if (repeatedChars.test(text)) {
+  alert("Mensagem inválida.");
+  return;
+}
+  const { error } = await supabase.from("torcida_mural").insert([
+    {
+      name: name.trim(),
+      team: team.trim() || "Torcida Social",
+      message: text.trim(),
+status: "pending",
+likes: 0,
+is_featured: false,
+    },
+  ]);
+
+  if (!error) {
     setName("");
     setTeam("");
     setText("");
+    loadMessages();
   }
+}
 
   return (
     <main className="min-h-screen bg-slate-950 text-white">
@@ -348,7 +404,7 @@ function TorcidaPage() {
                       {message.team}
                     </span>
                   </div>
-                  <p className="mt-3 text-slate-600">{message.text}</p>
+                  <p className="mt-3 text-slate-600">{message.message}</p>
                 </div>
               ))}
             </div>

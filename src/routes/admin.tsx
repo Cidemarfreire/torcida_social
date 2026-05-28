@@ -122,7 +122,24 @@ function Admin() {
                 Copa do Mundo e esporte social.
               </p>
             </div>
+<div className="mt-8">
+  <a
+    href="/admin.arquibancada"
+    className="block rounded-3xl border border-yellow-400/20 bg-yellow-400/10 p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/50"
+  >
+    <p className="text-sm font-bold uppercase tracking-[0.2em] text-yellow-600">
+      Moderação Inteligente
+    </p>
 
+    <h2 className="mt-3 text-3xl font-black text-slate-950">
+      Moderar Arquibancada Digital
+    </h2>
+
+    <p className="mt-3 text-slate-700">
+      Aprovar mensagens, bloquear spam, destacar torcedores e acompanhar a atividade do mural em tempo real.
+    </p>
+  </a>
+</div>
             <button
               type="button"
               onClick={() => generateNews.mutate()}
