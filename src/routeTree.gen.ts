@@ -40,6 +40,7 @@ import { Route as TSlugRouteImport } from './routes/t/$slug'
 import { Route as DoacoesObrigadoRouteImport } from './routes/doacoes.obrigado'
 import { Route as AdminNotificacoesRouteImport } from './routes/admin.notificacoes'
 import { Route as AdminLojasRouteImport } from './routes/admin.lojas'
+import { Route as AdminArquibancadaRouteImport } from './routes/admin.arquibancada'
 
 const ValidarCarteirinhaRoute = ValidarCarteirinhaRouteImport.update({
   id: '/validar-carteirinha',
@@ -197,6 +198,11 @@ const AdminLojasRoute = AdminLojasRouteImport.update({
   path: '/lojas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminArquibancadaRoute = AdminArquibancadaRouteImport.update({
+  id: '/arquibancada',
+  path: '/arquibancada',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/termos': typeof TermosRoute
   '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
+  '/admin/arquibancada': typeof AdminArquibancadaRoute
   '/admin/lojas': typeof AdminLojasRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/doacoes/obrigado': typeof DoacoesObrigadoRoute
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/termos': typeof TermosRoute
   '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
+  '/admin/arquibancada': typeof AdminArquibancadaRoute
   '/admin/lojas': typeof AdminLojasRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/doacoes/obrigado': typeof DoacoesObrigadoRoute
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/termos': typeof TermosRoute
   '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
+  '/admin/arquibancada': typeof AdminArquibancadaRoute
   '/admin/lojas': typeof AdminLojasRoute
   '/admin/notificacoes': typeof AdminNotificacoesRoute
   '/doacoes/obrigado': typeof DoacoesObrigadoRoute
@@ -328,6 +337,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/torcida'
     | '/validar-carteirinha'
+    | '/admin/arquibancada'
     | '/admin/lojas'
     | '/admin/notificacoes'
     | '/doacoes/obrigado'
@@ -361,6 +371,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/torcida'
     | '/validar-carteirinha'
+    | '/admin/arquibancada'
     | '/admin/lojas'
     | '/admin/notificacoes'
     | '/doacoes/obrigado'
@@ -394,6 +405,7 @@ export interface FileRouteTypes {
     | '/termos'
     | '/torcida'
     | '/validar-carteirinha'
+    | '/admin/arquibancada'
     | '/admin/lojas'
     | '/admin/notificacoes'
     | '/doacoes/obrigado'
@@ -650,15 +662,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLojasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/arquibancada': {
+      id: '/admin/arquibancada'
+      path: '/arquibancada'
+      fullPath: '/admin/arquibancada'
+      preLoaderRoute: typeof AdminArquibancadaRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminArquibancadaRoute: typeof AdminArquibancadaRoute
   AdminLojasRoute: typeof AdminLojasRoute
   AdminNotificacoesRoute: typeof AdminNotificacoesRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminArquibancadaRoute: AdminArquibancadaRoute,
   AdminLojasRoute: AdminLojasRoute,
   AdminNotificacoesRoute: AdminNotificacoesRoute,
 }
