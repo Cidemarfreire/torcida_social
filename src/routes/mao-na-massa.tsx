@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { NavigationActions } from "@/components/site/NavigationActions";
-import { PageActions } from "@/components/site/PageActions";
+
 export const Route = createFileRoute("/mao-na-massa")({
   component: MaoNaMassaPage,
 });
@@ -259,73 +259,7 @@ function MaoNaMassaPage() {
           </p>
         </div>
       </section>
-      <PageActions
-  nextHref="/torcida"
-  nextLabel="Ir para Arquibancada"
-/>
+      
     </main>
-  );
-}
-import { ArrowLeft, ArrowRight, Home, Share2 } from "lucide-react";
-
-type Props = {
-  nextHref?: string;
-  nextLabel?: string;
-};
-
-export function NavigationActions({
-  nextHref = "/",
-  nextLabel = "Seguir",
-}: Props) {
-  async function handleShare() {
-    const url = window.location.href;
-
-    if (navigator.share) {
-      await navigator.share({
-        title: "Torcida Social",
-        text: "Conheça o Torcida Social.",
-        url,
-      });
-      return;
-    }
-
-    await navigator.clipboard.writeText(url);
-    alert("Link copiado.");
-  }
-
-  return (
-    <div className="fixed bottom-4 left-1/2 z-[9999] flex w-[94%] max-w-xl -translate-x-1/2 items-center justify-between gap-2 rounded-full border border-white/20 bg-slate-950/95 p-2 shadow-2xl backdrop-blur">
-      <button
-        onClick={() => window.history.back()}
-        className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-3 text-xs font-black text-white"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Voltar
-      </button>
-
-      <a
-        href="/"
-        className="flex items-center gap-1 rounded-full bg-white px-3 py-3 text-xs font-black text-slate-950"
-      >
-        <Home className="h-4 w-4" />
-        Home
-      </a>
-
-      <button
-        onClick={handleShare}
-        className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-3 text-xs font-black text-white"
-      >
-        <Share2 className="h-4 w-4" />
-        Compartilhar
-      </button>
-
-      <a
-        href={nextHref}
-        className="flex items-center gap-1 rounded-full bg-yellow-400 px-3 py-3 text-xs font-black text-slate-950"
-      >
-        {nextLabel}
-        <ArrowRight className="h-4 w-4" />
-      </a>
-    </div>
   );
 }
