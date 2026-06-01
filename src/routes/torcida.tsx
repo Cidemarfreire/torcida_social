@@ -110,6 +110,18 @@ async function loadMessages() {
     setMessages(data);
   }
 }
+async function handleLike(messageId: string, currentLikes: number) {
+  if (!messageId) return;
+
+  const { error } = await supabase
+    .from("torcida_mural")
+    .update({ likes: currentLikes + 1 })
+    .eq("id", messageId);
+
+  if (!error) {
+    loadMessages();
+  }
+}
   const [name, setName] = useState("");
   const [team, setTeam] = useState("");
   const [text, setText] = useState("");
@@ -151,17 +163,16 @@ if (repeatedChars.test(text)) {
   alert("Mensagem inválida.");
   return;
 }
-  const { error } = await supabase.from("torcida_mural").insert([
-    {
-      name: name.trim(),
-      team: team.trim() || "Torcida Social",
-      message: text.trim(),
-status: "pending",
-likes: 0,
-is_featured: false,
-    },
-  ]);
-
+ const { error } = await supabase.from("torcida_mural").insert([
+  {
+    name: name.trim(),
+    team: team.trim() || "Torcida Social",
+    message: text.trim(),
+    status: "approved",
+    likes: 0,
+    is_featured: false,
+  },
+]);
   if (!error) {
     setName("");
     setTeam("");
@@ -397,16 +408,30 @@ is_featured: false,
               <h3 className="text-2xl font-black">Mensagens da torcida</h3>
             </div>
 
-            <div className="space-y-4">
+                       <div className="space-y-4">
               {messages.map((message, index) => (
-                <div key={`${message.name}-${index}`} className="rounded-2xl bg-white p-5 shadow">
+                <div
+                  key={message.id || `${message.name}-${index}`}
+                  className="rounded-2xl bg-white p-5 shadow"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <p className="font-black">{message.name}</p>
+
                     <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-bold text-yellow-400">
                       {message.team}
                     </span>
                   </div>
+
                   <p className="mt-3 text-slate-600">{message.message}</p>
+
+                  <div className="mt-4 flex items-center gap-2">
+                    <button
+                      onClick={() => handleLike(message.id, message.likes || 0)}
+                      className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-yellow-400 hover:text-slate-950"
+                    >
+                      ❤️ {message.likes || 0}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -414,6 +439,6 @@ is_featured: false,
         </div>
       </section>
     </main>
-    </SiteLayout>
-  );
+  </SiteLayout>
+);
 }
