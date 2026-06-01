@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { SiteLayout } from "@/components/site/SiteLayout";
 import { NavigationActions } from "@/components/site/NavigationActions";
-
 export const Route = createFileRoute("/mao-na-massa")({
   component: MaoNaMassaPage,
 });
@@ -28,6 +28,7 @@ const images = {
 
 function MaoNaMassaPage() {
   return (
+  <SiteLayout>
     <main className="min-h-screen bg-slate-950 text-white">
       <section
         className="relative min-h-[82vh] overflow-hidden bg-cover bg-center px-6 py-24 text-center"
@@ -261,5 +262,6 @@ function MaoNaMassaPage() {
       </section>
       
     </main>
+</SiteLayout>
   );
 }

@@ -1,3 +1,4 @@
+import { SiteLayout } from "@/components/site/SiteLayout";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -170,7 +171,8 @@ is_featured: false,
 }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
+    <SiteLayout>
+      <main className="min-h-screen bg-slate-950 text-white">
       <section className="relative overflow-hidden px-6 py-20">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.22),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(37,99,235,0.25),_transparent_30%)]" />
         <div className="relative z-10 mx-auto max-w-6xl text-center">
@@ -412,5 +414,6 @@ is_featured: false,
         </div>
       </section>
     </main>
+    </SiteLayout>
   );
 }
