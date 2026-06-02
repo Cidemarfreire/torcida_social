@@ -12,6 +12,7 @@ type NewsDraft = {
   call_to_action: string;
   sources: string[];
   image_url?: string | null;
+  slug: string;
 };
 
 const FALLBACK_IMAGE =
@@ -57,9 +58,9 @@ const NEWS_QUERIES = [
     query: `"Brasileirão Série A" Brasil futebol ${SERIE_A_CLUBS.join(" OR ")}`,
   },
   {
-    topic: "social_sports",
-    label: "Esporte social",
-    query: '"projetos sociais" futebol Brasil OR "esporte social" Brasil',
+    topic: "mercado_bola",
+    label: "Mercado da Bola",
+    query: '"mercado da bola" transferências futebol Brasil',
   },
   ...SERIE_A_CLUBS.map((club) => ({
     topic: "mundo_esportes",
@@ -107,6 +108,18 @@ function extractImage(item: string) {
   const img = description.match(/<img[^>]+src="([^"]+)"/i);
 
   return img?.[1] || null;
+}
+
+function createSlug(title: string) {
+  const base = (title || "noticia-futebol")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+
+  return `${base}-${Date.now()}`;
 }
 
 function normalizeTitle(title: string) {
@@ -182,30 +195,30 @@ function scoreNews(title: string, summary: string, label: string) {
 
 function buildSocialRelevance(topic: string) {
   if (topic === "selecao_brasileira") {
-    return "A Seleção Brasileira mobiliza milhões de torcedores e abre espaço para campanhas solidárias ligadas ao futebol.";
+    return "A Seleção Brasileira é o principal time do país e mobiliza milhões de torcedores.";
   }
 
   if (topic === "copa") {
-    return "A Copa do Mundo aumenta o engajamento nacional e pode impulsionar ações sociais conectadas à paixão pelo futebol.";
+    return "A Copa do Mundo é o maior evento do futebol mundial.";
   }
 
-  if (topic === "social_sports") {
-    return "Mostra como o esporte pode gerar inclusão, educação, pertencimento e transformação social.";
+  if (topic === "mercado_bola") {
+    return "O mercado de transferências movimenta milhões e define os rumos dos clubes.";
   }
 
-  return "O Brasileirão e os clubes da Série A mobilizam torcidas em todo o país, fortalecendo campanhas de impacto social.";
+  return "O Brasileirão e os clubes da Série A mobilizam torcidas em todo o país.";
 }
 
 function buildCallToAction(topic: string) {
-  if (topic === "social_sports") {
-    return "Convide sua torcida a apoiar um núcleo social pelo app.";
-  }
-
   if (topic === "selecao_brasileira" || topic === "copa") {
-    return "Use a força da Seleção para engajar torcedores em doações e ações sociais.";
+    return "Acompanhe os jogos e as novidades da Seleção.";
   }
 
-  return "Compartilhe essa pauta e fortaleça a Torcida Social com seu clube do coração.";
+  if (topic === "mercado_bola") {
+    return "Fique por dentro das transferências e contratações.";
+  }
+
+  return "Acompanhe as notícias do seu clube e do Brasileirão.";
 }
 
 async function fetchRssItems(queryConfig: typeof NEWS_QUERIES[number]) {
@@ -252,6 +265,7 @@ async function fetchRssItems(queryConfig: typeof NEWS_QUERIES[number]) {
         call_to_action: buildCallToAction(queryConfig.topic),
         sources: [item.source],
         image_url: item.image_url || FALLBACK_IMAGE,
+        slug: createSlug(item.title),
       })
     );
 }
@@ -288,6 +302,8 @@ async function insertNewsDrafts(news: NewsDraft[]) {
       );
 
     if (alreadyExists) continue;
+
+    console.log("Payload para insert news_drafts:", JSON.stringify(item, null, 2));
 
     const insertResponse = await fetch(`${supabaseUrl}/rest/v1/news_drafts`, {
       method: "POST",
