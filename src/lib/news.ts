@@ -12,7 +12,7 @@ export const NEWS_TOPICS: NewsTopic[] = [
 
 export const NEWS_TOPIC_LABELS: Record<NewsTopic, string> = {
   social_sports: "Esporte social",
-  selecao_brasileira: "Selecao Brasileira",
+  selecao_brasileira: "Seleção Brasileira",
   copa: "Mundo dos esportes",
 };
 
