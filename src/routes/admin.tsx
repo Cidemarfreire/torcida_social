@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database, Tables } from "@/integrations/supabase/types";
 import { formatNewsDate, NEWS_TOPIC_LABELS, NEWS_TOPICS } from "@/lib/news";
 import { generateNewsDraftsNow } from "@/lib/news.functions";
+import { isAdmin } from "@/lib/auth";
 
 export const Route = createFileRoute("/admin")({
   component: Admin,
@@ -34,8 +35,9 @@ function Admin() {
         return;
       }
 
-      if (user.email !== "cidemarfaria@gmail.com") {
-        navigate({ to: "/" });
+      const adminCheck = await isAdmin();
+      if (!adminCheck) {
+        navigate({ to: "/perfil" });
         return;
       }
 

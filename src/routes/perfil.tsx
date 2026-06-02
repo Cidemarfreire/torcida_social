@@ -5,6 +5,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { ClubBadge } from "@/components/site/ClubBadge";
 import { SERIE_A_CLUBS, ACHIEVEMENTS } from "@/lib/mock-data";
 import { supabase } from "@/integrations/supabase/client";
+import { isAdmin } from "@/lib/auth";
 
 export const Route = createFileRoute("/perfil")({
   component: Perfil,
@@ -37,6 +38,7 @@ function Perfil() {
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
@@ -62,6 +64,11 @@ function Perfil() {
 
       setProfile(data);
       setAvatarUrl(data?.avatar_url || "");
+      
+      // Verificar se usuário é admin
+      const adminCheck = await isAdmin();
+      setIsUserAdmin(adminCheck);
+      
       setLoading(false);
     }
 
@@ -279,45 +286,47 @@ function Perfil() {
         </form>
       </section>
 
-      <section className="px-6 mb-16 max-w-7xl mx-auto">
-        <div className="bg-gradient-to-r from-navy via-[#1f3b63] to-action rounded-3xl p-8 shadow-2xl border border-gold/20 overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-72 h-72 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+      {isUserAdmin && (
+        <section className="px-6 mb-16 max-w-7xl mx-auto">
+          <div className="bg-gradient-to-r from-navy via-[#1f3b63] to-action rounded-3xl p-8 shadow-2xl border border-gold/20 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-72 h-72 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
 
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="max-w-2xl">
-              <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold">
-                Administração · Torcida Social
-              </p>
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+              <div className="max-w-2xl">
+                <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-gold">
+                  Administração · Torcida Social
+                </p>
 
-              <h2 className="font-display text-3xl md:text-4xl font-black text-background mt-3 leading-tight">
-                Painel Executivo
-              </h2>
+                <h2 className="font-display text-3xl md:text-4xl font-black text-background mt-3 leading-tight">
+                  Painel Executivo
+                </h2>
 
-              <p className="text-background/75 mt-3 text-sm md:text-base leading-relaxed">
-                Acesse rapidamente métricas, notícias, arrecadações, núcleos
-                sociais, torcedores cadastrados e inteligência estratégica da
-                plataforma.
-              </p>
-            </div>
+                <p className="text-background/75 mt-3 text-sm md:text-base leading-relaxed">
+                  Acesse rapidamente métricas, notícias, arrecadações, núcleos
+                  sociais, torcedores cadastrados e inteligência estratégica da
+                  plataforma.
+                </p>
+              </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="/admin"
-                className="bg-gold text-navy px-8 py-4 rounded-2xl font-black text-center hover:scale-[1.02] hover:opacity-95 transition-all shadow-xl"
-              >
-                ACESSAR PAINEL ADMIN
-              </a>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a
+                  href="/admin"
+                  className="bg-gold text-navy px-8 py-4 rounded-2xl font-black text-center hover:scale-[1.02] hover:opacity-95 transition-all shadow-xl"
+                >
+                  ACESSAR PAINEL ADMIN
+                </a>
 
-              <a
-                href="/noticias"
-                className="bg-background/10 backdrop-blur border border-background/20 text-background px-8 py-4 rounded-2xl font-black text-center hover:bg-background/20 transition-all"
-              >
-                CENTRAL DE NOTÍCIAS
-              </a>
+                <a
+                  href="/noticias"
+                  className="bg-background/10 backdrop-blur border border-background/20 text-background px-8 py-4 rounded-2xl font-black text-center hover:bg-background/20 transition-all"
+                >
+                  CENTRAL DE NOTÍCIAS
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="px-6 max-w-7xl mx-auto">
         <PageHero eyebrow="Conquistas" title="Suas medalhas." />

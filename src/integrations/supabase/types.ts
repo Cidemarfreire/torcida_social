@@ -339,6 +339,7 @@ export type Database = {
           profile_completed: boolean
           referral_code: string | null
           referred_by: string | null
+          role: Database["public"]["Enums"]["app_role"]
           supporter_card_id: string | null
           supporter_card_status: Database["public"]["Enums"]["supporter_card_status"]
           updated_at: string
@@ -355,6 +356,7 @@ export type Database = {
           profile_completed?: boolean
           referral_code?: string | null
           referred_by?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
           supporter_card_id?: string | null
           supporter_card_status?: Database["public"]["Enums"]["supporter_card_status"]
           updated_at?: string
@@ -371,6 +373,7 @@ export type Database = {
           profile_completed?: boolean
           referral_code?: string | null
           referred_by?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
           supporter_card_id?: string | null
           supporter_card_status?: Database["public"]["Enums"]["supporter_card_status"]
           updated_at?: string

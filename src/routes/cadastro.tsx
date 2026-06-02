@@ -4,6 +4,7 @@ import { z } from "zod";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { ClubBadge } from "@/components/site/ClubBadge";
+import { DateInput } from "@/components/ui/DateInput";
 import { SERIE_A_CLUBS } from "@/lib/mock-data";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -125,7 +126,7 @@ function Cadastro() {
             <Field label="Senha" type="password" value={form.password} onChange={set("password")} placeholder="Mínimo 6 caracteres" required />
             <Field label="Cidade" value={form.city} onChange={set("city")} placeholder="Sua cidade" required />
             <Field label="Telefone/WhatsApp" value={form.phone} onChange={set("phone")} placeholder="(00) 00000-0000" required />
-            <Field label="Data de nascimento" type="date" value={form.birthDate} onChange={set("birthDate")} required />
+            <DateInput label="Data de nascimento" value={form.birthDate} onChange={(value) => setForm({ ...form, birthDate: value })} required />
             <Field label="Código de indicação" value={form.referredBy} onChange={set("referredBy")} placeholder="Opcional" className="md:col-span-2" />
           </div>
 

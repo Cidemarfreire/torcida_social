@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { ClubBadge } from "@/components/site/ClubBadge";
+import { DateInput } from "@/components/ui/DateInput";
 import { SERIE_A_CLUBS } from "@/lib/mock-data";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -137,7 +138,7 @@ function CompletarPerfil() {
                 <Field label="Nome completo" value={form.fullName} onChange={set("fullName")} required />
                 <Field label="Cidade" value={form.city} onChange={set("city")} required />
                 <Field label="Telefone/WhatsApp" value={form.phone} onChange={set("phone")} required />
-                <Field label="Data de nascimento" type="date" value={form.birthDate} onChange={set("birthDate")} required />
+                <DateInput label="Data de nascimento" value={form.birthDate} onChange={(value) => setForm((current) => ({ ...current, birthDate: value }))} required />
                 <Field label="Código de indicação" value={form.referredBy} onChange={set("referredBy")} placeholder="Opcional" className="md:col-span-2" />
               </div>
 
