@@ -1,0 +1,88 @@
+{
+  "resenha_videos": {
+    "description": "Coleção principal de vídeos curtos da Resenha",
+    "fields": {
+      "video_id": {
+        "type": "string",
+        "description": "Identificador único do vídeo"
+      },
+      "criador_id": {
+        "type": "string",
+        "description": "ID do usuário criador do vídeo"
+      },
+      "nome_canal": {
+        "type": "string",
+        "description": "Nome do canal/criador"
+      },
+      "origem_plataforma": {
+        "type": "string",
+        "enum": ["youtube_shorts", "instagram_reels", "tiktok"],
+        "description": "Plataforma de origem do vídeo"
+      },
+      "url_direta_video": {
+        "type": "string",
+        "description": "URL direta do vídeo para player"
+      },
+      "legenda_original": {
+        "type": "string",
+        "description": "Legenda/descrição original do vídeo"
+      },
+      "data_indexacao": {
+        "type": "timestamp",
+        "description": "Data de indexação no sistema"
+      },
+      "metricas_internas": {
+        "type": "map",
+        "fields": {
+          "likes_app": {
+            "type": "integer",
+            "description": "Número de likes dentro do app"
+          },
+          "visualizacoes_app": {
+            "type": "integer",
+            "description": "Número de visualizações dentro do app"
+          }
+        }
+      },
+      "polo_apadrinhado": {
+        "type": "string",
+        "description": "Nome do polo de torcida apadrinhado"
+      }
+    },
+    "subcollections": {
+      "chat_comunidade": {
+        "description": "Subcoleção de mensagens do chat comunitário para cada vídeo",
+        "fields": {
+          "mensagem_id": {
+            "type": "string",
+            "description": "Identificador único da mensagem"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "ID do usuário que enviou a mensagem"
+          },
+          "user_nome": {
+            "type": "string",
+            "description": "Nome do usuário"
+          },
+          "user_foto": {
+            "type": "string",
+            "description": "URL da foto de perfil do usuário"
+          },
+          "texto": {
+            "type": "string",
+            "description": "Conteúdo da mensagem"
+          },
+          "timestamp": {
+            "type": "timestamp",
+            "description": "Data/hora de envio da mensagem"
+          },
+          "time_coracao": {
+            "type": "string",
+            "description": "Timestamp formatado para exibição (ex: 10:30)"
+          }
+        }
+      }
+    }
+  }
+}

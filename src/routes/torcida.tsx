@@ -95,11 +95,8 @@ const initialMessages = [
 
 function TorcidaPage() {
   const [messages, setMessages] = useState<any[]>([]);
-  useEffect(() => {
-  loadMessages();
-}, []);
 
-async function loadMessages() {
+  async function loadMessages() {
   const { data, error } = await supabase
   .from("torcida_mural")
   .select("*")
@@ -110,76 +107,94 @@ async function loadMessages() {
     setMessages(data);
   }
 }
-async function handleLike(messageId: string, currentLikes: number) {
-  if (!messageId) return;
+
+  useEffect(() => {
+    loadMessages();
+  }, []);
+
+  async function handleLike(messageId: string, currentLikes: number) {
+    if (!messageId) return;
 
   const { error } = await supabase
     .from("torcida_mural")
-    .update({ likes: currentLikes + 1 })
+    .update({
+      likes: (currentLikes || 0) + 1,
+    })
     .eq("id", messageId);
 
-  if (!error) {
-    loadMessages();
+  if (error) {
+    alert(`Erro: ${error.message}`);
+    console.error(error);
+    return;
   }
+
+  await loadMessages();
 }
+
   const [name, setName] = useState("");
   const [team, setTeam] = useState("");
   const [text, setText] = useState("");
 
   async function handleSendMessage() {
-  if (!name.trim() || !text.trim()) return;
+    if (!name.trim() || !text.trim()) return;
 
-const forbiddenWords = [
-  "palavrão1",
-  "palavrão2",
-  "xingamento",
-  "ofensa",
-];
+    const forbiddenWords = [
+      "palavrão1",
+      "palavrão2",
+      "xingamento",
+      "ofensa",
+    ];
 
-const lowerMessage = text.toLowerCase();
+    const lowerMessage = text.toLowerCase();
 
-const hasForbiddenWord = forbiddenWords.some((word) =>
-  lowerMessage.includes(word)
-);
+    const hasForbiddenWord = forbiddenWords.some((word) =>
+      lowerMessage.includes(word)
+    );
 
-if (hasForbiddenWord) {
-  alert("Mensagem bloqueada pela moderação.");
-  return;
-}
+    if (hasForbiddenWord) {
+      alert("Mensagem bloqueada pela moderação.");
+      return;
+    }
 
-if (text.length > 300) {
-  alert("Mensagem muito longa.");
-  return;
-}
+    if (text.length > 300) {
+      alert("Mensagem muito longa.");
+      return;
+    }
 
-if (text.includes("http://") || text.includes("https://")) {
-  alert("Links não são permitidos.");
-  return;
-}
+    if (text.includes("http://") || text.includes("https://")) {
+      alert("Links não são permitidos.");
+      return;
+    }
 
-const repeatedChars = /(.)\1{7,}/;
+    const repeatedChars = /(.)\1{7,}/;
 
-if (repeatedChars.test(text)) {
-  alert("Mensagem inválida.");
-  return;
-}
- const { error } = await supabase.from("torcida_mural").insert([
-  {
-    name: name.trim(),
-    team: team.trim() || "Torcida Social",
-    message: text.trim(),
-    status: "approved",
-    likes: 0,
-    is_featured: false,
-  },
-]);
-  if (!error) {
+    if (repeatedChars.test(text)) {
+      alert("Mensagem inválida.");
+      return;
+    }
+
+    const { error } = await supabase.from("torcida_mural").insert([
+      {
+        name: name.trim(),
+        team: team.trim() || "Torcida Social",
+        message: text.trim(),
+        status: "approved",
+        likes: 0,
+        is_featured: false,
+      },
+    ]);
+
+    if (error) {
+      alert(`Erro ao enviar mensagem: ${error.message}`);
+      console.error(error);
+      return;
+    }
+
     setName("");
     setTeam("");
     setText("");
-    loadMessages();
+    await loadMessages();
   }
-}
 
   return (
     <SiteLayout>
@@ -396,19 +411,18 @@ if (repeatedChars.test(text)) {
               </button>
 
               <p className="mt-3 text-xs text-slate-400">
-                Nesta versão inicial, as mensagens aparecem localmente. Depois
-                conectaremos ao banco de dados.
+                As mensagens são salvas no banco de dados e aparecem em tempo real.
               </p>
             </div>
           </div>
 
-          <div className="rounded-3xl bg-slate-100 p-5">
+                  <div className="rounded-3xl bg-slate-100 p-5">
             <div className="mb-5 flex items-center gap-2">
               <MessageSquareText className="h-6 w-6 text-yellow-600" />
               <h3 className="text-2xl font-black">Mensagens da torcida</h3>
             </div>
 
-                       <div className="space-y-4">
+            <div className="space-y-4">
               {messages.map((message, index) => (
                 <div
                   key={message.id || `${message.name}-${index}`}
@@ -426,6 +440,7 @@ if (repeatedChars.test(text)) {
 
                   <div className="mt-4 flex items-center gap-2">
                     <button
+                      type="button"
                       onClick={() => handleLike(message.id, message.likes || 0)}
                       className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-yellow-400 hover:text-slate-950"
                     >
