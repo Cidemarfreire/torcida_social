@@ -95,10 +95,11 @@ const initialMessages = [
 
 function TorcidaPage() {
   const [messages, setMessages] = useState<any[]>([]);
+  const [comments, setComments] = useState<any[]>([]);
 
   async function loadMessages() {
   const { data, error } = await supabase
-  .from("torcida_mural")
+  .from("torcida_mural" as any)
   .select("*")
   .eq("status", "approved")
   .order("created_at", { ascending: false });
@@ -108,15 +109,29 @@ function TorcidaPage() {
   }
 }
 
+  async function loadComments() {
+    const { data, error } = await supabase
+      .from("torcida_comments" as any)
+      .select("*")
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setComments(data);
+    }
+  }
+
   useEffect(() => {
     loadMessages();
+    loadComments();
+    loadSocialFeed();
   }, []);
 
   async function handleLike(messageId: string, currentLikes: number) {
     if (!messageId) return;
 
   const { error } = await supabase
-    .from("torcida_mural")
+    .from("torcida_mural" as any)
     .update({
       likes: (currentLikes || 0) + 1,
     })
@@ -134,6 +149,10 @@ function TorcidaPage() {
   const [name, setName] = useState("");
   const [team, setTeam] = useState("");
   const [text, setText] = useState("");
+  const [commentName, setCommentName] = useState("");
+  const [commentText, setCommentText] = useState("");
+  const [activeCommentForm, setActiveCommentForm] = useState<string | null>(null);
+  const [socialFeed, setSocialFeed] = useState<any[]>([]);
 
   async function handleSendMessage() {
     if (!name.trim() || !text.trim()) return;
@@ -173,7 +192,7 @@ function TorcidaPage() {
       return;
     }
 
-    const { error } = await supabase.from("torcida_mural").insert([
+    const { error } = await supabase.from("torcida_mural" as any).insert([
       {
         name: name.trim(),
         team: team.trim() || "Torcida Social",
@@ -194,6 +213,110 @@ function TorcidaPage() {
     setTeam("");
     setText("");
     await loadMessages();
+  }
+
+  async function handleComment(muralId: string) {
+    if (!muralId) return;
+    if (!commentName.trim() || !commentText.trim()) return;
+
+    const { error } = await supabase.from("torcida_comments" as any).insert([
+      {
+        mural_id: muralId,
+        name: commentName.trim(),
+        comment: commentText.trim(),
+        status: "approved",
+      },
+    ]);
+
+    if (error) {
+      console.error(error);
+      alert(error.message);
+      return;
+    }
+
+    alert("Comentário enviado!");
+    setCommentName("");
+    setCommentText("");
+    setActiveCommentForm(null);
+    await loadComments();
+  }
+
+  function loadSocialFeed() {
+    const mockData = [
+      {
+        id: 1,
+        platform: "YouTube",
+        thumbnail: "https://via.placeholder.com/400x225/FF0000/FFFFFF?text=YouTube",
+        title: "Flamengo - Melhores Momentos da Temporada",
+        channel: "Flamengo Oficial",
+        date: "2024-05-15",
+        team: "Flamengo",
+      },
+      {
+        id: 2,
+        platform: "Instagram",
+        thumbnail: "https://via.placeholder.com/400x225/C13584/FFFFFF?text=Instagram",
+        title: "Vasco - Bastidores do Treinamento",
+        channel: "Vasco da Gama",
+        date: "2024-05-14",
+        team: "Vasco",
+      },
+      {
+        id: 3,
+        platform: "TikTok",
+        thumbnail: "https://via.placeholder.com/400x225/000000/FFFFFF?text=TikTok",
+        title: "Fluminense - Viral dos Torcedores",
+        channel: "Fluminense FC",
+        date: "2024-05-13",
+        team: "Fluminense",
+      },
+      {
+        id: 4,
+        platform: "Facebook",
+        thumbnail: "https://via.placeholder.com/400x225/1877F2/FFFFFF?text=Facebook",
+        title: "Botafogo - Mobilização Social",
+        channel: "Botafogo Oficial",
+        date: "2024-05-12",
+        team: "Botafogo",
+      },
+      {
+        id: 5,
+        platform: "YouTube",
+        thumbnail: "https://via.placeholder.com/400x225/FF0000/FFFFFF?text=YouTube",
+        title: "Torcida Social - Projetos Sociais",
+        channel: "Torcida Social",
+        date: "2024-05-11",
+        team: "Torcida Social",
+      },
+      {
+        id: 6,
+        platform: "Instagram",
+        thumbnail: "https://via.placeholder.com/400x225/C13584/FFFFFF?text=Instagram",
+        title: "Flamengo - Reels da Torcida",
+        channel: "Flamengo Oficial",
+        date: "2024-05-10",
+        team: "Flamengo",
+      },
+      {
+        id: 7,
+        platform: "TikTok",
+        thumbnail: "https://via.placeholder.com/400x225/000000/FFFFFF?text=TikTok",
+        title: "Vasco - Desafio dos Torcedores",
+        channel: "Vasco da Gama",
+        date: "2024-05-09",
+        team: "Vasco",
+      },
+      {
+        id: 8,
+        platform: "Facebook",
+        thumbnail: "https://via.placeholder.com/400x225/1877F2/FFFFFF?text=Facebook",
+        title: "Fluminense - Evento Comunitário",
+        channel: "Fluminense FC",
+        date: "2024-05-08",
+        team: "Fluminense",
+      },
+    ];
+    setSocialFeed(mockData);
   }
 
   return (
@@ -446,10 +569,110 @@ function TorcidaPage() {
                     >
                       ❤️ {message.likes || 0}
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveCommentForm(activeCommentForm === message.id ? null : message.id)}
+                      className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-blue-500 hover:text-white"
+                    >
+                      💬 Comentar
+                    </button>
                   </div>
+
+                  {activeCommentForm === message.id && (
+                    <div className="mt-4 rounded-2xl bg-slate-50 p-4">
+                      <input
+                        value={commentName}
+                        onChange={(event) => setCommentName(event.target.value)}
+                        placeholder="Seu nome"
+                        className="mb-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none placeholder:text-slate-400"
+                      />
+                      <textarea
+                        value={commentText}
+                        onChange={(event) => setCommentText(event.target.value)}
+                        placeholder="Escreva seu comentário"
+                        className="mb-2 min-h-20 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none placeholder:text-slate-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleComment(message.id)}
+                        className="w-full rounded-xl bg-blue-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-600"
+                      >
+                        Enviar comentário
+                      </button>
+                    </div>
+                  )}
+
+                  {comments.filter((comment) => comment.mural_id === message.id).length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      {comments
+                        .filter((comment) => comment.mural_id === message.id)
+                        .map((comment, commentIndex) => (
+                          <div
+                            key={comment.id || `${comment.mural_id}-${commentIndex}`}
+                            className="rounded-xl bg-slate-50 p-3"
+                          >
+                            <p className="text-xs font-bold text-slate-700">{comment.name}</p>
+                            <p className="mt-1 text-sm text-slate-600">{comment.comment}</p>
+                          </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 pb-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-8">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">
+              Central de Conteúdo
+            </p>
+            <h2 className="mt-3 text-3xl font-black md:text-5xl">
+              Central de Conteúdo dos Torcedores
+            </h2>
+            <p className="mt-4 text-slate-300">
+              Vídeos e conteúdos das redes sociais dos times e da torcida
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {socialFeed.map((item) => (
+              <div
+                key={item.id}
+                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl transition hover:-translate-y-1 hover:border-yellow-400/50"
+              >
+                <div className="relative aspect-video">
+                  <img
+                    src={item.thumbnail}
+                    alt={item.title}
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute top-2 right-2 rounded-full bg-black/70 px-3 py-1 text-xs font-bold text-white backdrop-blur">
+                    {item.platform}
+                  </div>
+                </div>
+
+                <div className="p-4">
+                  <h3 className="line-clamp-2 text-lg font-bold text-white">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-400">{item.channel}</p>
+                  <p className="mt-1 text-xs text-slate-500">{item.date}</p>
+
+                  <button
+                    type="button"
+                    onClick={() => alert(`Assistir: ${item.title}`)}
+                    className="mt-4 w-full rounded-xl bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-yellow-300"
+                  >
+                    Assistir
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
