@@ -34,6 +34,9 @@ function Perfil() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [savingAvatar, setSavingAvatar] = useState(false);
   const [avatarMessage, setAvatarMessage] = useState<string | null>(null);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProfile() {
@@ -121,6 +124,37 @@ function Perfil() {
         ? "Avatar atualizado com sucesso."
         : "Avatar removido com sucesso."
     );
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeletingAccount(true);
+    setDeleteMessage(null);
+
+    try {
+      const { error } = await supabase
+        .from("account_deletion_requests" as any)
+        .insert([
+          {
+            user_id: userId,
+            email: email,
+            reason: "Solicitação via aplicativo",
+            status: "pending",
+          },
+        ]);
+
+      if (error) {
+        setDeleteMessage(error.message);
+        return;
+      }
+
+      await supabase.auth.signOut();
+      navigate({ to: "/login" });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao solicitar exclusão";
+      setDeleteMessage(message);
+    } finally {
+      setDeletingAccount(false);
+    }
   };
 
   if (loading) {
@@ -309,6 +343,59 @@ function Perfil() {
               <p className="text-xs text-navy/60 mt-1">{a.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="px-6 mb-16 max-w-7xl mx-auto">
+        <div className="bg-card border border-red-200 rounded-2xl p-6 shadow-sm">
+          <h3 className="font-display text-xl font-black text-red-600 mb-2">
+            Excluir minha conta
+          </h3>
+          <p className="text-sm text-navy/70 mb-4">
+            Esta ação é permanente. Seus dados de perfil serão removidos e sua conta será excluída.
+          </p>
+
+          {!showDeleteConfirmation ? (
+            <button
+              type="button"
+              onClick={() => setShowDeleteConfirmation(true)}
+              className="bg-red-600 text-white px-6 py-3 rounded-xl font-black hover:bg-red-700 transition-colors"
+            >
+              Excluir minha conta
+            </button>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-red-600 font-bold">
+                Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleDeleteAccount}
+                  disabled={deletingAccount}
+                  className="bg-red-600 text-white px-6 py-3 rounded-xl font-black hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {deletingAccount ? "Processando..." : "Confirmar exclusão"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteConfirmation(false);
+                    setDeleteMessage(null);
+                  }}
+                  disabled={deletingAccount}
+                  className="border-2 border-navy/10 text-navy px-6 py-3 rounded-xl font-black hover:border-action transition-colors disabled:opacity-50"
+                >
+                  Cancelar
+                </button>
+              </div>
+              {deleteMessage && (
+                <div className="bg-red-50 border border-red-200 text-sm rounded-lg px-4 py-3 text-red-700">
+                  {deleteMessage}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </SiteLayout>

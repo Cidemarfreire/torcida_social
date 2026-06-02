@@ -45,6 +45,7 @@ function Privacidade() {
 
         <h2 className="font-display text-2xl font-black text-navy">5. Seus direitos (LGPD)</h2>
         <p>Você pode solicitar acesso, correção, exclusão ou portabilidade dos seus dados pelo e-mail <a href="mailto:torcidasocial@gmail.com" className="text-action underline">torcidasocial@gmail.com</a>.</p>
+        <p className="mt-2">O usuário pode solicitar a exclusão da conta e dos dados pessoais pelo próprio aplicativo, acessando a página de Perfil e clicando em "Excluir minha conta".</p>
 
         <h2 className="font-display text-2xl font-black text-navy">6. Segurança</h2>
         <p>Usamos criptografia em trânsito (HTTPS) e em repouso. Dados de pagamento são processados por gateways certificados PCI-DSS.</p>
