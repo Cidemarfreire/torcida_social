@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ExternalLink, Newspaper, Rss } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
-import { NEWS } from "@/lib/mock-data";
 import {
   fetchPublishedNews,
   formatNewsDate,
@@ -84,12 +83,8 @@ function Noticias() {
       <section className="px-6 pb-16 max-w-7xl mx-auto">
         {isLoading ? (
           <LoadingState />
-        ) : news.length > 0 ? (
-          <NewsGrid news={news} />
-        ) : isError ? (
-          <PreviewGrid message="Nao foi possivel carregar as noticias publicadas. Exibindo destaques de exemplo." />
         ) : (
-          <PreviewGrid message="Ainda nao ha noticias aprovadas nesta categoria. O time pode gerar e publicar em /admin." />
+          <NewsGrid news={news} />
         )}
       </section>
     </SiteLayout>
@@ -135,13 +130,6 @@ function NewsGrid({ news }: { news: NewsDraft[] }) {
               {formatNewsDate(item.published_at ?? item.created_at)}
             </span>
           </div>
-          {item.image_url && (
-  <img
-    src={item.image_url}
-    alt={item.title}
-    className="w-full h-56 object-cover rounded-2xl mb-4 border border-navy/10"
-  />
-)}
           <p className="text-navy/65 text-sm mt-3 leading-relaxed">
             {item.summary}
           </p>
@@ -191,68 +179,6 @@ function LoadingState() {
       <p className="mt-2 text-navy/60">
         Buscando os conteudos aprovados pela curadoria.
       </p>
-    </div>
-  );
-}
-
-function PreviewGrid({ message }: { message: string }) {
-  return (
-    <div>
-      <div className="bg-gold/10 border border-gold/30 rounded-3xl p-6 mb-6">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-action">
-          Destaques de exemplo
-        </p>
-        <p className="text-sm font-bold text-navy mt-1">{message}</p>
-      </div>
-      <div className="grid md:grid-cols-3 gap-6">
-        {NEWS.map((item) => (
-          <article
-            key={item.slug}
-            className="bg-card border border-navy/5 rounded-3xl p-7"
-          >
-            <div className="flex items-center gap-3 text-xs">
-              <span className="bg-action/10 text-action font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                {item.tag}
-              </span>
-              <span className="text-navy/40 font-bold">{item.date}</span>
-            </div>
-            <h2 className="font-display text-xl font-black mt-4 leading-tight">
-              {item.title}
-            </h2>
-            <p className="text-navy/65 text-sm mt-3 leading-relaxed">
-              {item.excerpt}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2">
-  <a
-    href={`https://wa.me/?text=${encodeURIComponent(item.title + " - https://www.multplen.com.br/noticias")}`}
-    target="_blank"
-    rel="noreferrer"
-    className="bg-green-600 text-white px-3 py-2 rounded-xl text-xs font-bold"
-  >
-    WhatsApp
-  </a>
-
-  <a
-    href={`mailto:?subject=${encodeURIComponent(item.title)}&body=${encodeURIComponent(item.summary + "\n\nLeia em: https://www.multplen.com.br/noticias")}`}
-    className="bg-navy text-background px-3 py-2 rounded-xl text-xs font-bold"
-  >
-    Email
-  </a>
-
-  <button
-    onClick={() => navigator.share?.({
-      title: item.title,
-      text: item.summary,
-      url: "https://www.multplen.com.br/noticias",
-    })}
-    className="bg-action text-background px-3 py-2 rounded-xl text-xs font-bold"
-  >
-    Compartilhar
-  </button>
-</div>
-          </article>
-        ))}
-      </div>
     </div>
   );
 }
