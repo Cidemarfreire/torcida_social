@@ -9,13 +9,19 @@ export const NEWS_TOPICS: NewsTopic[] = [
   "social_sports",
   "selecao_brasileira",
   "copa",
-];
+  "futebol_nacional",
+  "futebol_mundial",
+  "esporte_social",
+] as NewsTopic[];
 
 export const NEWS_TOPIC_LABELS: Record<NewsTopic, string> = {
-  social_sports: "Esporte social",
+  social_sports: "Esporte Social",
   selecao_brasileira: "Seleção Brasileira",
-  copa: "Mundo dos esportes",
-};
+  copa: "Futebol Mundial",
+  futebol_nacional: "Futebol Nacional",
+  futebol_mundial: "Futebol Mundial",
+  esporte_social: "Esporte Social",
+} as Record<NewsTopic, string>;
 
 export const NEWS_TOPIC_DESCRIPTIONS: Record<NewsTopic, string> = {
   social_sports:
@@ -23,7 +29,13 @@ export const NEWS_TOPIC_DESCRIPTIONS: Record<NewsTopic, string> = {
   selecao_brasileira:
     "Selecao Brasileira e o caminho rumo a Copa, com foco em mobilizacao social.",
   copa: "Panorama do futebol e dos esportes no mundo, com relevancia para torcidas.",
-};
+  futebol_nacional:
+    "Brasileirão, clubes da Série A e futebol nacional em geral.",
+  futebol_mundial:
+    "Futebol mundial, ligas internacionais e competições globais.",
+  esporte_social:
+    "Projetos sociais, inclusão e transformação pelo esporte.",
+} as Record<NewsTopic, string>;
 
 export function formatNewsDate(value: string | null) {
   if (!value) {
@@ -98,7 +110,7 @@ function convertFootballNewsToNewsDraft(
 
   return filtered.map((item) => ({
     id: item.id,
-    topic: topicMapping[item.category] || "copa",
+    topic: (topicMapping[item.category] || "copa") as NewsTopic,
     title: item.title,
     summary: item.summary,
     social_relevance: "",
@@ -112,6 +124,7 @@ function convertFootballNewsToNewsDraft(
     generated_by: "mock",
     slug: item.id,
     updated_at: item.date,
+    image_url: null,
   }));
 }
 

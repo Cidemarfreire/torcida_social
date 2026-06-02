@@ -6,7 +6,7 @@ import { PageHero } from "@/components/site/PageHero";
 import { STATS, formatInt } from "@/lib/mock-data";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database, Tables } from "@/integrations/supabase/types";
-import { formatNewsDate, NEWS_TOPIC_LABELS } from "@/lib/news";
+import { formatNewsDate, NEWS_TOPIC_LABELS, NEWS_TOPICS } from "@/lib/news";
 import { generateNewsDraftsNow } from "@/lib/news.functions";
 
 export const Route = createFileRoute("/admin")({
@@ -20,6 +20,8 @@ function Admin() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [checkingAccess, setCheckingAccess] = useState(true);
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterTopic, setFilterTopic] = useState<string>("all");
 
   useEffect(() => {
     async function checkAccess() {
@@ -48,6 +50,12 @@ function Admin() {
     queryFn: fetchNewsDrafts,
     retry: 1,
     enabled: !checkingAccess,
+  });
+
+  const filteredNews = newsDrafts.filter((item) => {
+    if (filterStatus !== "all" && item.status !== filterStatus) return false;
+    if (filterTopic !== "all" && item.topic !== filterTopic) return false;
+    return true;
   });
 
   const reviewNews = useMutation({
@@ -156,21 +164,54 @@ function Admin() {
                 Rascunhos de notícias
               </h3>
               <span className="text-xs font-bold text-navy/50">
-                {newsDrafts.length} item(ns)
+                {filteredNews.length} item(ns)
               </span>
+            </div>
+
+            <div className="flex flex-wrap gap-3 mb-5">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-bold text-navy/60">Status:</label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="bg-card border border-navy/10 rounded-lg px-3 py-2 text-xs font-bold text-navy"
+                >
+                  <option value="all">Todos</option>
+                  <option value="draft">Rascunhos</option>
+                  <option value="approved">Aprovados</option>
+                  <option value="published">Publicados</option>
+                  <option value="rejected">Rejeitados</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-bold text-navy/60">Categoria:</label>
+                <select
+                  value={filterTopic}
+                  onChange={(e) => setFilterTopic(e.target.value)}
+                  className="bg-card border border-navy/10 rounded-lg px-3 py-2 text-xs font-bold text-navy"
+                >
+                  <option value="all">Todas</option>
+                  {NEWS_TOPICS.map((topic) => (
+                    <option key={topic} value={topic}>
+                      {NEWS_TOPIC_LABELS[topic]}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {isLoadingNews ? (
               <p className="text-sm font-bold text-navy/60">
                 Carregando notícias...
               </p>
-            ) : newsDrafts.length === 0 ? (
+            ) : filteredNews.length === 0 ? (
               <p className="text-sm text-navy/60">
-                Nenhum rascunho encontrado. Clique em “Coletar notícias agora”.
+                Nenhum rascunho encontrado com os filtros atuais.
               </p>
             ) : (
               <div className="grid gap-5">
-                {newsDrafts.map((item) => (
+                {filteredNews.map((item) => (
                   <div
                     key={item.id}
                     className="bg-surface border border-navy/5 rounded-3xl p-5 grid lg:grid-cols-[220px_1fr_auto] gap-5"

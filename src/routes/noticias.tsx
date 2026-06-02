@@ -116,7 +116,7 @@ function TopicTab({
 
 function NewsGrid({ news }: { news: NewsDraft[] }) {
   return (
-    <div className="grid md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {news.map((item) => (
         <article
           key={item.id}
@@ -130,6 +130,13 @@ function NewsGrid({ news }: { news: NewsDraft[] }) {
               {formatNewsDate(item.published_at ?? item.created_at)}
             </span>
           </div>
+          {item.image_url && (
+            <img
+              src={item.image_url}
+              alt={item.title}
+              className="w-full h-56 object-cover rounded-2xl mt-4 border border-navy/10"
+            />
+          )}
           <p className="text-navy/65 text-sm mt-3 leading-relaxed">
             {item.summary}
           </p>

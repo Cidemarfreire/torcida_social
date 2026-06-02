@@ -239,6 +239,7 @@ export type Database = {
           created_at: string
           generated_by: string
           id: string
+          image_url: string | null
           published_at: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -256,6 +257,7 @@ export type Database = {
           created_at?: string
           generated_by?: string
           id?: string
+          image_url?: string | null
           published_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -273,6 +275,7 @@ export type Database = {
           created_at?: string
           generated_by?: string
           id?: string
+          image_url?: string | null
           published_at?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -620,7 +623,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "moderator", "user"],
       news_status: ["draft", "approved", "rejected", "published"],
-      news_topic: ["social_sports", "selecao_brasileira", "copa"],
+      news_topic: ["social_sports", "selecao_brasileira", "copa", "futebol_nacional", "futebol_mundial", "esporte_social"],
     },
   },
 } as const
