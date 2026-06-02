@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NavigationActions } from "@/components/site/NavigationActions";
+import { OfficialFeedSection } from "@/components/site/OfficialFeedSection";
 // Arquibancada Digital Premium
 
 import {
@@ -239,6 +240,12 @@ function TorcidaPage() {
     setCommentText("");
     setActiveCommentForm(null);
     await loadComments();
+  }
+
+  function handleShare(message: any) {
+    const shareText = `Veja essa mensagem na Arquibancada Digital do Torcida Social:\n[${message.name} - ${message.team}]\n${message.message}\nAcesse: ${window.location.origin}/torcida`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    window.open(whatsappUrl, "_blank");
   }
 
   function loadSocialFeed() {
@@ -577,6 +584,14 @@ function TorcidaPage() {
                     >
                       💬 Comentar
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleShare(message)}
+                      className="rounded-full bg-slate-100 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-green-500 hover:text-white"
+                    >
+                      🔄 Compartilhar
+                    </button>
                   </div>
 
                   {activeCommentForm === message.id && (
@@ -676,6 +691,8 @@ function TorcidaPage() {
           </div>
         </div>
       </section>
+
+      <OfficialFeedSection />
     </main>
   </SiteLayout>
 );
