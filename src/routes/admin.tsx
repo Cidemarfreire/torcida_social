@@ -113,6 +113,46 @@ function Admin() {
         subtitle="Gestão de notícias, métricas, torcedores, campanhas e ações da plataforma."
       />
 
+      <section className="px-6 py-8 max-w-7xl mx-auto">
+        <div className="bg-card border border-navy/5 rounded-2xl p-6 shadow-sm">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-navy/50 mb-4">
+            Atalhos rápidos
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <a
+              href="#noticias-admin"
+              className="bg-navy/5 border border-navy/10 hover:border-action hover:bg-action/10 px-4 py-3 rounded-xl text-xs font-bold text-navy hover:text-action transition-all text-center"
+            >
+              Gerenciar Notícias
+            </a>
+            <a
+              href="/noticias"
+              className="bg-navy/5 border border-navy/10 hover:border-action hover:bg-action/10 px-4 py-3 rounded-xl text-xs font-bold text-navy hover:text-action transition-all text-center"
+            >
+              Ver Central Pública
+            </a>
+            <a
+              href="/perfil"
+              className="bg-navy/5 border border-navy/10 hover:border-action hover:bg-action/10 px-4 py-3 rounded-xl text-xs font-bold text-navy hover:text-action transition-all text-center"
+            >
+              Voltar ao Perfil
+            </a>
+            <a
+              href="/admin.arquibancada"
+              className="bg-navy/5 border border-navy/10 hover:border-action hover:bg-action/10 px-4 py-3 rounded-xl text-xs font-bold text-navy hover:text-action transition-all text-center"
+            >
+              Arquibancada
+            </a>
+            <a
+              href="/mural"
+              className="bg-navy/5 border border-navy/10 hover:border-action hover:bg-action/10 px-4 py-3 rounded-xl text-xs font-bold text-navy hover:text-action transition-all text-center"
+            >
+              Mural
+            </a>
+          </div>
+        </div>
+      </section>
+
       <section className="px-6 py-12 max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card label="Torcedores ativos" value={formatInt(STATS.torcedores)} delta="+12,4%" />
         <Card label="Doações no mês" value="R$ 318.420" delta="+8,2%" />
@@ -120,7 +160,7 @@ function Admin() {
         <Card label="Núcleos" value="8" delta="+1 mês" />
       </section>
 
-      <section className="px-6 pt-4 pb-24 max-w-7xl mx-auto">
+      <section id="noticias-admin" className="px-6 pt-4 pb-24 max-w-7xl mx-auto">
         <div className="bg-card border border-navy/5 rounded-3xl overflow-hidden mb-8">
           <div className="px-6 py-5 border-b border-navy/5 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>

@@ -374,14 +374,21 @@ function Perfil() {
                   href="/admin"
                   className="bg-gold text-navy px-8 py-4 rounded-2xl font-black text-center hover:scale-[1.02] hover:opacity-95 transition-all shadow-xl"
                 >
-                  ACESSAR PAINEL ADMIN
+                  PAINEL ADMIN
+                </a>
+
+                <a
+                  href="/admin#noticias-admin"
+                  className="bg-background/10 backdrop-blur border border-background/20 text-background px-8 py-4 rounded-2xl font-black text-center hover:bg-background/20 transition-all"
+                >
+                  GERENCIAR NOTÍCIAS
                 </a>
 
                 <a
                   href="/noticias"
                   className="bg-background/10 backdrop-blur border border-background/20 text-background px-8 py-4 rounded-2xl font-black text-center hover:bg-background/20 transition-all"
                 >
-                  CENTRAL DE NOTÍCIAS
+                  VER CENTRAL PÚBLICA
                 </a>
               </div>
             </div>

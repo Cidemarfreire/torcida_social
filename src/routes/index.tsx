@@ -93,65 +93,17 @@ function Home() {
                 Cadastrar Minha Torcida
               </Link>
               <Link
+                to="/login"
+                className="border-2 border-navy/10 px-7 py-4 rounded-xl font-bold hover:bg-navy hover:text-background transition-all"
+              >
+                Já tenho conta, entrar
+              </Link>
+              <Link
                 to="/projetos"
                 className="border-2 border-navy/10 px-7 py-4 rounded-xl font-bold hover:bg-navy hover:text-background transition-all"
               >
                 Ver Projetos
               </Link>
-            </div>
-
-            <div className="bg-card border border-navy/5 rounded-2xl p-4 md:p-5 shadow-sm max-w-xl">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="size-9 rounded-xl bg-action/10 text-action flex items-center justify-center">
-                    <Newspaper size={18} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-navy/45">
-                      Central de Noticias
-                    </p>
-                    <p className="text-sm font-black text-navy">
-                      RSS + curadoria, 3 vezes ao dia
-                    </p>
-                  </div>
-                </div>
-                <Rss className="text-gold shrink-0" size={18} />
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {NEWS_TOPICS.map((topic) => {
-                  const active = activeTopic === topic;
-                  return (
-                    <button
-                      key={topic}
-                      type="button"
-                      onClick={() => setActiveTopic(topic)}
-                      className={`px-3 py-2 rounded-full text-xs font-bold border transition-colors ${
-                        active
-                          ? "bg-navy text-background border-navy"
-                          : "bg-background text-navy/65 border-navy/10 hover:border-action"
-                      }`}
-                    >
-                      {NEWS_TOPIC_LABELS[topic]}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="mt-4 bg-surface rounded-xl p-4">
-                <h2 className="font-display text-lg font-black leading-tight">
-                  {activeItem?.title ?? activeFallback.title}
-                </h2>
-                <p className="text-sm text-navy/60 mt-1 leading-relaxed">
-                  {activeItem?.summary ?? activeFallback.text}
-                </p>
-                <Link
-                  to="/noticias"
-                  className="mt-3 inline-flex items-center gap-2 text-sm font-black text-action hover:text-navy transition-colors"
-                >
-                  Abrir noticias agora <ArrowRight size={15} />
-                </Link>
-              </div>
             </div>
           </div>
 
