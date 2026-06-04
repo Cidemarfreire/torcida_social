@@ -1,5 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
+import { Camera } from "lucide-react";
+
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { ClubBadge } from "@/components/site/ClubBadge";
@@ -17,28 +20,31 @@ export const Route = createFileRoute("/perfil")({
   }),
 });
 
+type Profile = {
+  full_name: string | null;
+  city: string | null;
+  club_id: string | null;
+  created_at: string;
+  supporter_card_id: string | null;
+  referral_code: string | null;
+  avatar_url: string | null;
+};
+
 function Perfil() {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<{
-    full_name: string | null;
-    city: string | null;
-    club_id: string | null;
-    created_at: string;
-    supporter_card_id: string | null;
-    referral_code: string | null;
-    avatar_url: string | null;
-  } | null>(null);
 
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState("");
   const [userId, setUserId] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [savingAvatar, setSavingAvatar] = useState(false);
   const [avatarMessage, setAvatarMessage] = useState<string | null>(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     async function loadProfile() {
@@ -63,12 +69,10 @@ function Perfil() {
         .maybeSingle();
 
       setProfile(data);
-      setAvatarUrl(data?.avatar_url || "");
-      
-      // Verificar se usuário é admin
+
       const adminCheck = await isAdmin();
       setIsUserAdmin(adminCheck);
-      
+
       setLoading(false);
     }
 
@@ -95,45 +99,78 @@ function Perfil() {
     ? new Date(profile.created_at).getFullYear()
     : new Date().getFullYear();
 
-  const saveAvatar = async (event: React.FormEvent) => {
-    event.preventDefault();
+  function handleAvatarClick() {
+    fileInputRef.current?.click();
+  }
+
+  async function handleAvatarUpload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file || !userId) return;
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+    if (!allowedTypes.includes(file.type)) {
+      setAvatarMessage("Formato não suportado. Use JPG, PNG ou WEBP.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarMessage("Arquivo muito grande. Máximo permitido: 2MB.");
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingAvatar(true);
     setAvatarMessage(null);
 
-    const nextAvatarUrl = avatarUrl.trim();
+    try {
+      const fileExt = file.name.split(".").pop() || "jpg";
+      const filePath = `${userId}/avatar-${Date.now()}.${fileExt}`;
 
-    if (nextAvatarUrl && !/^https?:\/\/.+/i.test(nextAvatarUrl)) {
-      setAvatarMessage(
-        "Informe uma URL de imagem começando com http:// ou https://"
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+      const avatarUrl = data.publicUrl;
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: avatarUrl })
+        .eq("id", userId);
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      setProfile((current) =>
+        current ? { ...current, avatar_url: avatarUrl } : current
       );
-      return;
+
+      setAvatarMessage("Foto atualizada com sucesso!");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Não foi possível enviar a foto.";
+      setAvatarMessage(message);
+    } finally {
+      setUploadingAvatar(false);
+      event.target.value = "";
     }
+  }
 
-    setSavingAvatar(true);
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({ avatar_url: nextAvatarUrl || null })
-      .eq("id", userId);
-
-    setSavingAvatar(false);
-
-    if (error) {
-      setAvatarMessage(error.message);
-      return;
-    }
-
-    setProfile((current) =>
-      current ? { ...current, avatar_url: nextAvatarUrl || null } : current
-    );
-
-    setAvatarMessage(
-      nextAvatarUrl
-        ? "Avatar atualizado com sucesso."
-        : "Avatar removido com sucesso."
-    );
-  };
-
-  const handleDeleteAccount = async () => {
+  async function handleDeleteAccount() {
     setDeletingAccount(true);
     setDeleteMessage(null);
 
@@ -143,7 +180,7 @@ function Perfil() {
         .insert([
           {
             user_id: userId,
-            email: email,
+            email,
             reason: "Solicitação via aplicativo",
             status: "pending",
           },
@@ -157,12 +194,13 @@ function Perfil() {
       await supabase.auth.signOut();
       navigate({ to: "/login" });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erro ao solicitar exclusão";
+      const message =
+        err instanceof Error ? err.message : "Erro ao solicitar exclusão";
       setDeleteMessage(message);
     } finally {
       setDeletingAccount(false);
     }
-  };
+  }
 
   if (loading) {
     return (
@@ -183,26 +221,73 @@ function Perfil() {
         }}
       >
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center md:items-end gap-6">
-          {profile?.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt={name}
-              className="size-28 rounded-3xl object-cover bg-background/15 backdrop-blur"
+          <div className="relative flex flex-col items-center">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
+              onChange={handleAvatarUpload}
+              className="hidden"
             />
-          ) : (
-            <div className="size-28 rounded-3xl bg-background/15 backdrop-blur grid place-items-center text-5xl font-display font-black">
-              {initials}
-            </div>
-          )}
+
+            <button
+              type="button"
+              onClick={handleAvatarClick}
+              disabled={uploadingAvatar}
+              className="relative group"
+              title="Alterar foto"
+            >
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={name}
+                  className="size-28 rounded-full object-cover bg-background/15 backdrop-blur border-4 border-background shadow-xl"
+                />
+              ) : (
+                <div className="size-28 rounded-full bg-background/15 backdrop-blur grid place-items-center text-5xl font-display font-black border-4 border-background shadow-xl">
+                  {initials}
+                </div>
+              )}
+
+              <div className="absolute bottom-1 right-1 bg-gold text-navy p-3 rounded-full shadow-lg group-hover:bg-action group-hover:text-background transition-colors border-2 border-background">
+                <Camera size={18} />
+              </div>
+            </button>
+
+            {uploadingAvatar && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-full backdrop-blur-sm">
+                <span className="text-xs font-black text-navy">
+                  Enviando...
+                </span>
+              </div>
+            )}
+
+            {avatarMessage && (
+              <p className="mt-3 max-w-56 text-center text-xs font-bold text-background/90">
+                {avatarMessage}
+              </p>
+            )}
+          </div>
 
           <div className="flex-1 text-center md:text-left">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] opacity-80">
               Torcedor desde {since}
             </p>
+
             <h1 className="font-display text-4xl md:text-5xl font-black mt-2">
               {name}
             </h1>
+
             <p className="opacity-80 mt-1">{profile?.city || email}</p>
+
+            <button
+              type="button"
+              onClick={handleAvatarClick}
+              disabled={uploadingAvatar}
+              className="mt-3 rounded-full bg-background/15 px-5 py-2 text-xs font-black text-background hover:bg-background/25 transition-colors disabled:opacity-50"
+            >
+              {uploadingAvatar ? "Enviando..." : "Alterar foto"}
+            </button>
           </div>
 
           <div className="flex items-center gap-3 bg-background/10 backdrop-blur rounded-2xl p-4 px-6">
@@ -219,8 +304,14 @@ function Perfil() {
 
       <section className="px-6 -mt-20 mb-16 max-w-7xl mx-auto grid md:grid-cols-3 gap-6">
         {[
-          { label: "Carteirinha", value: profile?.supporter_card_id || "Pendente" },
-          { label: "Código de indicação", value: profile?.referral_code || "Pendente" },
+          {
+            label: "Carteirinha",
+            value: profile?.supporter_card_id || "Pendente",
+          },
+          {
+            label: "Código de indicação",
+            value: profile?.referral_code || "Pendente",
+          },
           { label: "Doações realizadas", value: 0 },
         ].map((s) => (
           <div
@@ -238,44 +329,14 @@ function Perfil() {
       </section>
 
       <section className="px-6 mb-16 max-w-7xl mx-auto">
-        <form
-          onSubmit={saveAvatar}
-          className="bg-card border border-navy/5 rounded-2xl p-6 shadow-sm space-y-4"
-        >
+        <div className="bg-card border border-navy/5 rounded-2xl p-6 shadow-sm space-y-4">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-navy/50">
               Foto ou avatar
             </p>
             <p className="text-sm text-navy/60 mt-1">
-              Cole a URL de uma imagem para personalizar seu perfil.
+              Escolha uma foto ou avatar para personalizar seu perfil.
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-[1fr_auto_auto] gap-3">
-            <input
-              type="url"
-              value={avatarUrl}
-              onChange={(event) => setAvatarUrl(event.target.value)}
-              placeholder="https://exemplo.com/minha-foto.jpg"
-              className="w-full bg-surface border-2 border-navy/10 px-4 py-3 rounded-xl font-medium focus:border-action outline-none transition-colors"
-            />
-
-            <button
-              type="submit"
-              disabled={savingAvatar}
-              className="bg-navy text-background px-6 py-3 rounded-xl font-black hover:bg-action transition-colors disabled:opacity-50"
-            >
-              {savingAvatar ? "SALVANDO..." : "SALVAR"}
-            </button>
-
-            <button
-              type="button"
-              disabled={savingAvatar || !avatarUrl}
-              onClick={() => setAvatarUrl("")}
-              className="border-2 border-navy/10 text-navy px-6 py-3 rounded-xl font-black hover:border-action transition-colors disabled:opacity-50"
-            >
-              REMOVER
-            </button>
           </div>
 
           {avatarMessage && (
@@ -283,7 +344,7 @@ function Perfil() {
               {avatarMessage}
             </div>
           )}
-        </form>
+        </div>
       </section>
 
       {isUserAdmin && (
@@ -360,8 +421,10 @@ function Perfil() {
           <h3 className="font-display text-xl font-black text-red-600 mb-2">
             Excluir minha conta
           </h3>
+
           <p className="text-sm text-navy/70 mb-4">
-            Esta ação é permanente. Seus dados de perfil serão removidos e sua conta será excluída.
+            Esta ação é permanente. Seus dados de perfil serão removidos e sua
+            conta será excluída.
           </p>
 
           {!showDeleteConfirmation ? (
@@ -375,8 +438,10 @@ function Perfil() {
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-red-600 font-bold">
-                Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.
+                Tem certeza que deseja excluir sua conta? Esta ação não pode ser
+                desfeita.
               </p>
+
               <div className="flex gap-3">
                 <button
                   type="button"
@@ -386,6 +451,7 @@ function Perfil() {
                 >
                   {deletingAccount ? "Processando..." : "Confirmar exclusão"}
                 </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -398,6 +464,7 @@ function Perfil() {
                   Cancelar
                 </button>
               </div>
+
               {deleteMessage && (
                 <div className="bg-red-50 border border-red-200 text-sm rounded-lg px-4 py-3 text-red-700">
                   {deleteMessage}
