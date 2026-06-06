@@ -6,6 +6,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import heroTorcida from "@/assets/hero-torcida.jpg";
 import { isAdmin } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import {
   fetchPublishedNews,
   formatNewsDate,
@@ -15,29 +16,6 @@ import {
   type NewsDraft,
   type NewsTopic,
 } from "@/lib/news";
-
-const BRASILEIRAO_STANDINGS_FALLBACK = [
-  { pos: 1, team: "Flamengo", pts: 45, j: 20, v: 14, e: 3, d: 3, sg: 25 },
-  { pos: 2, team: "Palmeiras", pts: 42, j: 20, v: 13, e: 3, d: 4, sg: 18 },
-  { pos: 3, team: "Botafogo", pts: 40, j: 20, v: 12, e: 4, d: 4, sg: 15 },
-  { pos: 4, team: "Atlético-MG", pts: 38, j: 20, v: 11, e: 5, d: 4, sg: 12 },
-  { pos: 5, team: "Fluminense", pts: 36, j: 20, v: 10, e: 6, d: 4, sg: 8 },
-  { pos: 6, team: "São Paulo", pts: 35, j: 20, v: 10, e: 5, d: 5, sg: 6 },
-  { pos: 7, team: "Grêmio", pts: 34, j: 20, v: 9, e: 7, d: 4, sg: 5 },
-  { pos: 8, team: "Cruzeiro", pts: 33, j: 20, v: 9, e: 6, d: 5, sg: 3 },
-  { pos: 9, team: "Internacional", pts: 32, j: 20, v: 8, e: 8, d: 4, sg: 2 },
-  { pos: 10, team: "Athletico-PR", pts: 30, j: 20, v: 8, e: 6, d: 6, sg: 0 },
-  { pos: 11, team: "Fortaleza", pts: 29, j: 20, v: 7, e: 8, d: 5, sg: -2 },
-  { pos: 12, team: "Bahia", pts: 28, j: 20, v: 7, e: 7, d: 6, sg: -4 },
-  { pos: 13, team: "Vasco", pts: 27, j: 20, v: 6, e: 9, d: 5, sg: -6 },
-  { pos: 14, team: "Corinthians", pts: 26, j: 20, v: 6, e: 8, d: 6, sg: -8 },
-  { pos: 15, team: "Santos", pts: 25, j: 20, v: 5, e: 10, d: 5, sg: -10 },
-  { pos: 16, team: "Cuiabá", pts: 24, j: 20, v: 5, e: 9, d: 6, sg: -12 },
-  { pos: 17, team: "Goiás", pts: 23, j: 20, v: 4, e: 11, d: 5, sg: -14 },
-  { pos: 18, team: "Coritiba", pts: 22, j: 20, v: 4, e: 10, d: 6, sg: -16 },
-  { pos: 19, team: "América-MG", pts: 21, j: 20, v: 3, e: 12, d: 5, sg: -18 },
-  { pos: 20, team: "Ceará", pts: 20, j: 20, v: 3, e: 11, d: 6, sg: -20 },
-];
 
 export const Route = createFileRoute("/noticias")({
   component: Noticias,
@@ -127,55 +105,7 @@ function Noticias() {
       </section>
 
       <section className="px-6 py-8 max-w-7xl mx-auto">
-        <div className="bg-card border border-navy/5 rounded-3xl p-6 shadow-sm">
-          <div className="mb-6">
-            <h2 className="font-display text-2xl font-black text-navy">
-              Tabela do Brasileirão
-            </h2>
-            <p className="text-sm text-navy/60 mt-1">
-              Acompanhe a classificação, pontos e posição dos clubes.
-            </p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-navy/10">
-                  <th className="text-left font-bold text-navy/50 uppercase tracking-wider py-3 px-2">Pos.</th>
-                  <th className="text-left font-bold text-navy/50 uppercase tracking-wider py-3 px-2">Time</th>
-                  <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">Pts</th>
-                  <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">J</th>
-                  <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">V</th>
-                  <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">E</th>
-                  <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">D</th>
-                  <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">SG</th>
-                </tr>
-              </thead>
-              <tbody>
-                {BRASILEIRAO_STANDINGS_FALLBACK.map((team) => (
-                  <tr key={team.pos} className="border-b border-navy/5 hover:bg-navy/5 transition-colors">
-                    <td className="py-3 px-2">
-                      <span className="font-display font-black text-navy">{team.pos}</span>
-                      {team.pos <= 4 && (
-                        <span className="ml-2 bg-success/20 text-success text-[10px] font-bold px-2 py-0.5 rounded-full">G4</span>
-                      )}
-                      {team.pos >= 17 && (
-                        <span className="ml-2 bg-red-500/20 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full">Z4</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-2 font-bold text-navy">{team.team}</td>
-                    <td className="py-3 px-2 text-center font-display font-black text-navy">{team.pts}</td>
-                    <td className="py-3 px-2 text-center text-navy/70">{team.j}</td>
-                    <td className="py-3 px-2 text-center text-success font-bold">{team.v}</td>
-                    <td className="py-3 px-2 text-center text-navy/70">{team.e}</td>
-                    <td className="py-3 px-2 text-center text-red-600 font-bold">{team.d}</td>
-                    <td className="py-3 px-2 text-center font-display font-bold text-navy/70">{team.sg}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <BrasileiraoTable />
       </section>
 
       <section className="px-6 pb-16 max-w-7xl mx-auto">
@@ -297,6 +227,117 @@ function LoadingState() {
       <p className="mt-2 text-navy/60">
         Buscando os conteudos aprovados pela curadoria.
       </p>
+    </div>
+  );
+}
+
+function BrasileiraoTable() {
+  const { data: standingsData, isLoading, isError } = useQuery({
+    queryKey: ["brasileirao-standings"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("get-brasileirao-standings");
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    },
+    retry: 1,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="bg-card border border-navy/5 rounded-3xl p-6 shadow-sm">
+        <div className="mb-6">
+          <h2 className="font-display text-2xl font-black text-navy">
+            Tabela do Brasileirão
+          </h2>
+          <p className="text-sm text-navy/60 mt-1">
+            Acompanhe a classificação, pontos e posição dos clubes.
+          </p>
+        </div>
+        <div className="bg-surface rounded-xl p-8 text-center">
+          <Newspaper className="mx-auto text-navy/30 mb-4 animate-pulse" size={48} />
+          <p className="font-display text-lg font-black text-navy mb-2">
+            Carregando classificação...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !standingsData?.standings) {
+    return (
+      <div className="bg-card border border-navy/5 rounded-3xl p-6 shadow-sm">
+        <div className="mb-6">
+          <h2 className="font-display text-2xl font-black text-navy">
+            Tabela do Brasileirão
+          </h2>
+          <p className="text-sm text-navy/60 mt-1">
+            Acompanhe a classificação, pontos e posição dos clubes.
+          </p>
+        </div>
+        <div className="bg-surface rounded-xl p-8 text-center">
+          <Newspaper className="mx-auto text-navy/30 mb-4" size={48} />
+          <p className="font-display text-lg font-black text-navy mb-2">
+            Classificação em atualização
+          </p>
+          <p className="text-sm text-navy/60">
+            Tente novamente em instantes.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-card border border-navy/5 rounded-3xl p-6 shadow-sm">
+      <div className="mb-6">
+        <h2 className="font-display text-2xl font-black text-navy">
+          Tabela do Brasileirão
+        </h2>
+        <p className="text-sm text-navy/60 mt-1">
+          Acompanhe a classificação, pontos e posição dos clubes.
+        </p>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-navy/10">
+              <th className="text-left font-bold text-navy/50 uppercase tracking-wider py-3 px-2">Pos.</th>
+              <th className="text-left font-bold text-navy/50 uppercase tracking-wider py-3 px-2">Time</th>
+              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">Pts</th>
+              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">J</th>
+              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">V</th>
+              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">E</th>
+              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">D</th>
+              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">SG</th>
+            </tr>
+          </thead>
+          <tbody>
+            {standingsData.standings.map((team: any) => (
+              <tr key={team.position} className="border-b border-navy/5 hover:bg-navy/5 transition-colors">
+                <td className="py-3 px-2">
+                  <span className="font-display font-black text-navy">{team.position}</span>
+                  {team.position <= 4 && (
+                    <span className="ml-2 bg-success/20 text-success text-[10px] font-bold px-2 py-0.5 rounded-full">G4</span>
+                  )}
+                  {team.position >= 17 && (
+                    <span className="ml-2 bg-red-500/20 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full">Z4</span>
+                  )}
+                </td>
+                <td className="py-3 px-2 font-bold text-navy">{team.teamName}</td>
+                <td className="py-3 px-2 text-center font-display font-black text-navy">{team.points}</td>
+                <td className="py-3 px-2 text-center text-navy/70">{team.playedGames}</td>
+                <td className="py-3 px-2 text-center text-success font-bold">{team.won}</td>
+                <td className="py-3 px-2 text-center text-navy/70">{team.draw}</td>
+                <td className="py-3 px-2 text-center text-red-600 font-bold">{team.lost}</td>
+                <td className="py-3 px-2 text-center font-display font-bold text-navy/70">{team.goalDifference}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
