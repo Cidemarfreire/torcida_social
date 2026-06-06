@@ -1,0 +1,22 @@
+# ==========================================
+
+# TORCIDA SOCIAL - ROBOTS.TXT
+
+# ==========================================
+
+User-agent: *
+Allow: /
+
+# Áreas privadas
+
+Disallow: /admin
+Disallow: /perfil
+Disallow: /login
+Disallow: /cadastro
+Disallow: /completar-perfil
+
+# Sitemap oficial
+
+Sitemap: https://www.torcidasocial.com.br/sitemap.xml
+
+# Fim do arquivo
