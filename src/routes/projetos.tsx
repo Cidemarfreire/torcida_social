@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
+import { ShareButton } from "@/components/ShareButton";
 import { PROJECTS } from "@/lib/mock-data";
 import projEsporte from "@/assets/projeto-esporte.jpg";
 import projEdu from "@/assets/projeto-educacao.jpg";
@@ -44,6 +45,13 @@ function Projetos() {
             </div>
           </article>
         ))}
+      </section>
+
+      {/* SHARE BUTTON */}
+      <section className="px-6 py-8 max-w-7xl mx-auto">
+        <div className="flex justify-end">
+          <ShareButton />
+        </div>
       </section>
     </SiteLayout>
   );

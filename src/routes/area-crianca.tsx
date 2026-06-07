@@ -3,6 +3,7 @@ import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
+import { ShareButton } from "@/components/ShareButton";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -224,6 +225,13 @@ function AreaCrianca() {
             )}
           </div>
         </aside>
+      </section>
+
+      {/* SHARE BUTTON */}
+      <section className="px-6 py-8 max-w-7xl mx-auto">
+        <div className="flex justify-end">
+          <ShareButton />
+        </div>
       </section>
     </SiteLayout>
   );

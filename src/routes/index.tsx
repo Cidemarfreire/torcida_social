@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowRight, Newspaper, Rss } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { ClubBadge } from "@/components/site/ClubBadge";
+import { ShareButton } from "@/components/ShareButton";
 import { SERIE_A_CLUBS, STATS, RANKING, PROJECTS, formatBRL, formatInt } from "@/lib/mock-data";
 import {
   fetchPublishedNews,
@@ -288,6 +289,13 @@ function Home() {
               </article>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* SHARE BUTTON */}
+      <section className="py-8 px-6">
+        <div className="max-w-7xl mx-auto flex justify-end">
+          <ShareButton />
         </div>
       </section>
     </SiteLayout>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ExternalLink, Newspaper, Rss, ArrowRight } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
+import { ShareButton } from "@/components/ShareButton";
 import heroTorcida from "@/assets/hero-torcida.jpg";
 import { isAdmin } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -114,6 +115,13 @@ function Noticias() {
         ) : (
           <NewsGrid news={news} />
         )}
+      </section>
+
+      {/* SHARE BUTTON */}
+      <section className="px-6 py-8 max-w-7xl mx-auto">
+        <div className="flex justify-end">
+          <ShareButton />
+        </div>
       </section>
     </SiteLayout>
   );

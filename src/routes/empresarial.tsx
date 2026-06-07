@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { Gem, Award, BarChart3, MapPin, Smartphone, Megaphone, UserCheck, ArrowRight } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
+import { ShareButton } from "@/components/ShareButton";
 import { DonationCheckout } from "@/components/DonationCheckout";
 
 const DIAMOND_PERKS = [
@@ -174,6 +175,13 @@ function Empresarial() {
           <a href="mailto:torcidasocial@gmail.com" className="inline-block mt-6 bg-action text-background px-8 py-4 rounded-xl font-bold hover:bg-navy transition-colors">
             Falar com nossa equipe
           </a>
+        </div>
+      </section>
+
+      {/* SHARE BUTTON */}
+      <section className="px-6 py-8 max-w-7xl mx-auto">
+        <div className="flex justify-end">
+          <ShareButton />
         </div>
       </section>
     </SiteLayout>

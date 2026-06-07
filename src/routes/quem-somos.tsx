@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
+import { ShareButton } from "@/components/ShareButton";
 import criancaImg from "@/assets/crianca-bola.jpg";
 
 export const Route = createFileRoute("/quem-somos")({
@@ -106,6 +107,13 @@ function QuemSomos() {
               ))}
             </ul>
           </div>
+        </div>
+      </section>
+
+      {/* SHARE BUTTON */}
+      <section className="px-6 py-8 max-w-7xl mx-auto">
+        <div className="flex justify-end">
+          <ShareButton />
         </div>
       </section>
     </SiteLayout>

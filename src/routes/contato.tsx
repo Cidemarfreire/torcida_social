@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
+import { ShareButton } from "@/components/ShareButton";
 
 export const Route = createFileRoute("/contato")({
   component: Contato,
@@ -48,6 +49,13 @@ function Contato() {
           <Info label="E-mail" value="torcidasocial@gmail.com" />
           <Info label="Horário" value="Seg–Sex · 9h às 18h" />
         </aside>
+      </section>
+
+      {/* SHARE BUTTON */}
+      <section className="px-6 py-8 max-w-7xl mx-auto">
+        <div className="flex justify-end">
+          <ShareButton />
+        </div>
       </section>
     </SiteLayout>
   );
