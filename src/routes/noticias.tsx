@@ -235,7 +235,10 @@ function BrasileiraoTable() {
   const { data: standingsData, isLoading, isError } = useQuery({
     queryKey: ["brasileirao-standings"],
     queryFn: async () => {
+      console.log("BrasileiraoTable: Invocando Edge Function...");
       const { data, error } = await supabase.functions.invoke("get-brasileirao-standings");
+      console.log("Brasileirao Data:", data);
+      console.log("Brasileirao Error:", error);
       if (error) {
         throw new Error(error.message);
       }
