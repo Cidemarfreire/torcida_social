@@ -2,14 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 
 function getGenerateNewsUrl() {
   const explicitUrl = process.env.GENERATE_NEWS_FUNCTION_URL;
-  if (explicitUrl) return explicitUrl;
-
-  const projectId = process.env.VITE_SUPABASE_PROJECT_ID;
-  if (!projectId) {
-    throw new Error("VITE_SUPABASE_PROJECT_ID ou GENERATE_NEWS_FUNCTION_URL não configurado");
+  if (explicitUrl) {
+    return explicitUrl;
   }
-
-  return `https://${projectId}.supabase.co/functions/v1/generate-news-drafts`;
+  return "https://yqmgtqtrpxoqbgpkdjcg.supabase.co/functions/v1/generate-news-drafts";
 }
 
 export const generateNewsDraftsNow = createServerFn({ method: "POST" }).handler(async () => {
