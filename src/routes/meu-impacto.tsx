@@ -47,9 +47,9 @@ function MeuImpacto() {
             <h2 className="font-display text-3xl md:text-4xl font-black mt-2 uppercase italic">Sua solidariedade tem nome.</h2>
             <p className="text-background/70 mt-3">Gere um certificado personalizado para compartilhar nas suas redes.</p>
           </div>
-          <div className="flex flex-col gap-3">
-            <button className="bg-gold text-navy px-6 py-4 rounded-xl font-black">Gerar certificado</button>
-            <button className="border-2 border-background/20 px-6 py-4 rounded-xl font-bold">Compartilhar impacto</button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button className="w-full sm:w-auto bg-gold text-navy px-6 py-4 rounded-xl font-black">Gerar certificado</button>
+            <button className="w-full sm:w-auto border-2 border-background/20 px-6 py-4 rounded-xl font-bold">Compartilhar impacto</button>
           </div>
         </div>
       </section>
