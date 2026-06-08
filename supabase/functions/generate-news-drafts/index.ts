@@ -48,22 +48,22 @@ const NEWS_QUERIES = [
     query: '"Seleção Brasileira" futebol Brasil Copa do Mundo 2026',
   },
   {
-    topic: "copa",
+    topic: "futebol_mundial",
     label: "Copa do Mundo",
     query: '"Copa do Mundo 2026" Brasil "Seleção Brasileira"',
   },
   {
-    topic: "mundo_esportes",
+    topic: "futebol_nacional",
     label: "Brasileirão Série A",
     query: `"Brasileirão Série A" Brasil futebol ${SERIE_A_CLUBS.join(" OR ")}`,
   },
   {
-    topic: "mercado_bola",
+    topic: "futebol_nacional",
     label: "Mercado da Bola",
     query: '"mercado da bola" transferências futebol Brasil',
   },
   ...SERIE_A_CLUBS.map((club) => ({
-    topic: "mundo_esportes",
+    topic: "futebol_nacional",
     label: club,
     query: `"${club}" "Brasileirão" futebol Brasil`,
   })),
@@ -198,27 +198,35 @@ function buildSocialRelevance(topic: string) {
     return "A Seleção Brasileira é o principal time do país e mobiliza milhões de torcedores.";
   }
 
-  if (topic === "copa") {
+  if (topic === "futebol_mundial") {
     return "A Copa do Mundo é o maior evento do futebol mundial.";
   }
 
-  if (topic === "mercado_bola") {
-    return "O mercado de transferências movimenta milhões e define os rumos dos clubes.";
+  if (topic === "futebol_nacional") {
+    return "O Brasileirão e os clubes da Série A mobilizam torcidas em todo o país.";
   }
 
-  return "O Brasileirão e os clubes da Série A mobilizam torcidas em todo o país.";
+  if (topic === "esporte_social") {
+    return "Projetos sociais e inclusão pelo esporte transformam comunidades.";
+  }
+
+  return "O futebol brasileiro mobiliza milhões de torcedores em todo o país.";
 }
 
 function buildCallToAction(topic: string) {
-  if (topic === "selecao_brasileira" || topic === "copa") {
+  if (topic === "selecao_brasileira" || topic === "futebol_mundial") {
     return "Acompanhe os jogos e as novidades da Seleção.";
   }
 
-  if (topic === "mercado_bola") {
-    return "Fique por dentro das transferências e contratações.";
+  if (topic === "futebol_nacional") {
+    return "Acompanhe as notícias do seu clube e do Brasileirão.";
   }
 
-  return "Acompanhe as notícias do seu clube e do Brasileirão.";
+  if (topic === "esporte_social") {
+    return "Conheça projetos de impacto social pelo esporte.";
+  }
+
+  return "Acompanhe as notícias do futebol brasileiro.";
 }
 
 async function fetchRssItems(queryConfig: typeof NEWS_QUERIES[number]) {
@@ -303,6 +311,8 @@ async function insertNewsDrafts(news: NewsDraft[]) {
 
     if (alreadyExists) continue;
 
+    console.log("Inserindo notícia:", item.title);
+    console.log("Categoria:", item.topic);
     console.log("Payload para insert news_drafts:", JSON.stringify(item, null, 2));
 
     const insertResponse = await fetch(`${supabaseUrl}/rest/v1/news_drafts`, {
