@@ -286,7 +286,7 @@ function Admin() {
                       )}
                     </div>
 
-                    <div className="flex flex-wrap lg:flex-col gap-2 lg:min-w-28">
+                    <div className="mt-4 flex flex-wrap gap-2">
                       <button
                         onClick={() =>
                           reviewNews.mutate({ id: item.id, status: "approved" })
@@ -363,10 +363,14 @@ async function updateNewsStatus({
   id: string;
   status: NewsStatus;
 }) {
-  const updateData: { status: NewsStatus; published_at?: string } = { status };
+  const updateData: { status: NewsStatus; published_at?: string; reviewed_at?: string } = { status };
   
   if (status === "published") {
     updateData.published_at = new Date().toISOString();
+  }
+
+  if (status === "approved" || status === "rejected") {
+    updateData.reviewed_at = new Date().toISOString();
   }
 
   const { error } = await supabase
