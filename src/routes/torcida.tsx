@@ -3,7 +3,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { NavigationActions } from "@/components/site/NavigationActions";
-import { OfficialFeedSection } from "@/components/site/OfficialFeedSection";
 // Arquibancada Digital Premium
 
 import {
@@ -55,44 +54,6 @@ const socialLinks = [
   },
 ];
 
-const comingSoon = [
-  {
-    title: "Reels da Torcida Social",
-    description:
-      "Aqui entrarão vídeos oficiais do Instagram com ações, bastidores e histórias reais.",
-    tag: "Instagram",
-  },
-  {
-    title: "Desafios da Arquibancada",
-    description:
-      "Campanhas no TikTok para mobilizar torcedores, clubes, atletas e parceiros.",
-    tag: "TikTok",
-  },
-  {
-    title: "Shorts de Impacto",
-    description:
-      "Vídeos curtos do YouTube mostrando projetos sociais, reformas e transformação.",
-    tag: "YouTube",
-  },
-];
-
-const initialMessages = [
-  {
-    name: "Torcedor Social",
-    team: "Flamengo",
-    text: "A torcida precisa ser força de transformação dentro e fora do estádio.",
-  },
-  {
-    name: "Ana Paula",
-    team: "Vasco",
-    text: "Muito forte ver o futebol ajudando famílias e crianças. Quero participar.",
-  },
-  {
-    name: "Carlos RJ",
-    team: "Botafogo",
-    text: "Essa Arquibancada Digital pode virar uma grande rede de apoio no Brasil.",
-  },
-];
 
 function TorcidaPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -125,7 +86,6 @@ function TorcidaPage() {
   useEffect(() => {
     loadMessages();
     loadComments();
-    loadSocialFeed();
   }, []);
 
   async function handleLike(messageId: string, currentLikes: number) {
@@ -153,7 +113,6 @@ function TorcidaPage() {
   const [commentName, setCommentName] = useState("");
   const [commentText, setCommentText] = useState("");
   const [activeCommentForm, setActiveCommentForm] = useState<string | null>(null);
-  const [socialFeed, setSocialFeed] = useState<any[]>([]);
 
   async function handleSendMessage() {
     if (!name.trim() || !text.trim()) return;
@@ -248,83 +207,6 @@ function TorcidaPage() {
     window.open(whatsappUrl, "_blank");
   }
 
-  function loadSocialFeed() {
-    const mockData = [
-      {
-        id: 1,
-        platform: "YouTube",
-        thumbnail: "https://via.placeholder.com/400x225/FF0000/FFFFFF?text=YouTube",
-        title: "Flamengo - Melhores Momentos da Temporada",
-        channel: "Flamengo Oficial",
-        date: "2024-05-15",
-        team: "Flamengo",
-      },
-      {
-        id: 2,
-        platform: "Instagram",
-        thumbnail: "https://via.placeholder.com/400x225/C13584/FFFFFF?text=Instagram",
-        title: "Vasco - Bastidores do Treinamento",
-        channel: "Vasco da Gama",
-        date: "2024-05-14",
-        team: "Vasco",
-      },
-      {
-        id: 3,
-        platform: "TikTok",
-        thumbnail: "https://via.placeholder.com/400x225/000000/FFFFFF?text=TikTok",
-        title: "Fluminense - Viral dos Torcedores",
-        channel: "Fluminense FC",
-        date: "2024-05-13",
-        team: "Fluminense",
-      },
-      {
-        id: 4,
-        platform: "Facebook",
-        thumbnail: "https://via.placeholder.com/400x225/1877F2/FFFFFF?text=Facebook",
-        title: "Botafogo - Mobilização Social",
-        channel: "Botafogo Oficial",
-        date: "2024-05-12",
-        team: "Botafogo",
-      },
-      {
-        id: 5,
-        platform: "YouTube",
-        thumbnail: "https://via.placeholder.com/400x225/FF0000/FFFFFF?text=YouTube",
-        title: "Torcida Social - Projetos Sociais",
-        channel: "Torcida Social",
-        date: "2024-05-11",
-        team: "Torcida Social",
-      },
-      {
-        id: 6,
-        platform: "Instagram",
-        thumbnail: "https://via.placeholder.com/400x225/C13584/FFFFFF?text=Instagram",
-        title: "Flamengo - Reels da Torcida",
-        channel: "Flamengo Oficial",
-        date: "2024-05-10",
-        team: "Flamengo",
-      },
-      {
-        id: 7,
-        platform: "TikTok",
-        thumbnail: "https://via.placeholder.com/400x225/000000/FFFFFF?text=TikTok",
-        title: "Vasco - Desafio dos Torcedores",
-        channel: "Vasco da Gama",
-        date: "2024-05-09",
-        team: "Vasco",
-      },
-      {
-        id: 8,
-        platform: "Facebook",
-        thumbnail: "https://via.placeholder.com/400x225/1877F2/FFFFFF?text=Facebook",
-        title: "Fluminense - Evento Comunitário",
-        channel: "Fluminense FC",
-        date: "2024-05-08",
-        team: "Fluminense",
-      },
-    ];
-    setSocialFeed(mockData);
-  }
 
   return (
     <SiteLayout>
@@ -411,10 +293,10 @@ function TorcidaPage() {
         <div className="mx-auto max-w-6xl">
           <div className="mb-8">
             <p className="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">
-              Conexões sociais
+              Redes sociais oficiais
             </p>
             <h2 className="mt-3 text-3xl font-black md:text-5xl">
-              Redes sociais integradas ao propósito
+              Siga o Torcida Social
             </h2>
           </div>
 
@@ -443,57 +325,6 @@ function TorcidaPage() {
         </div>
       </section>
 
-      <section className="px-6 pb-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">
-              Feed da resenha
-            </p>
-            <h2 className="mt-3 text-3xl font-black md:text-5xl">
-              Espaço preparado para Reels, Shorts e TikToks oficiais
-            </h2>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {comingSoon.map((item) => (
-              <div
-                key={item.title}
-                className="relative flex min-h-[430px] flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-b from-zinc-800 to-black p-6 shadow-2xl"
-              >
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(250,204,21,0.18),_transparent_35%)]" />
-                <div className="relative z-10">
-                  <span className="rounded-full bg-yellow-400 px-4 py-2 text-xs font-black uppercase text-slate-950">
-                    {item.tag}
-                  </span>
-
-                  <h3 className="mt-8 text-3xl font-black">{item.title}</h3>
-                  <p className="mt-4 text-slate-300">{item.description}</p>
-                </div>
-
-                <div className="relative z-10">
-                  <div className="flex items-center gap-5 text-slate-300">
-                    <span className="flex items-center gap-2">
-                      <Heart className="h-5 w-5" /> 0
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <MessageCircle className="h-5 w-5" /> Em breve
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <Share2 className="h-5 w-5" /> Compartilhar
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-6 rounded-2xl border border-yellow-400/30 bg-yellow-400/10 p-5 text-sm text-yellow-100">
-            Nesta fase, a Arquibancada Digital está pronta visualmente. A
-            conexão automática com APIs oficiais de Instagram, TikTok, YouTube e
-            Facebook pode entrar na próxima etapa.
-          </p>
-        </div>
-      </section>
 
       <section className="bg-white px-6 py-20 text-slate-950">
         <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-[0.95fr_1.05fr]">
@@ -640,59 +471,6 @@ function TorcidaPage() {
         </div>
       </section>
 
-      <section className="px-6 pb-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-8">
-            <p className="text-sm font-bold uppercase tracking-[0.25em] text-yellow-400">
-              Central de Conteúdo
-            </p>
-            <h2 className="mt-3 text-3xl font-black md:text-5xl">
-              Central de Conteúdo dos Torcedores
-            </h2>
-            <p className="mt-4 text-slate-300">
-              Vídeos e conteúdos das redes sociais dos times e da torcida
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {socialFeed.map((item) => (
-              <div
-                key={item.id}
-                className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl transition hover:-translate-y-1 hover:border-yellow-400/50"
-              >
-                <div className="relative aspect-video">
-                  <img
-                    src={item.thumbnail}
-                    alt={item.title}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute top-2 right-2 rounded-full bg-black/70 px-3 py-1 text-xs font-bold text-white backdrop-blur">
-                    {item.platform}
-                  </div>
-                </div>
-
-                <div className="p-4">
-                  <h3 className="line-clamp-2 text-lg font-bold text-white">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-slate-400">{item.channel}</p>
-                  <p className="mt-1 text-xs text-slate-500">{item.date}</p>
-
-                  <button
-                    type="button"
-                    onClick={() => alert(`Assistir: ${item.title}`)}
-                    className="mt-4 w-full rounded-xl bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 transition hover:bg-yellow-300"
-                  >
-                    Assistir
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <OfficialFeedSection />
     </main>
   </SiteLayout>
 );
