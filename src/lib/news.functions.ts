@@ -20,9 +20,24 @@ export const generateNewsDraftsNow = createServerFn({ method: "POST" }).handler(
     },
   });
 
-  const json = await res.json().catch(() => ({}));
+  const rawText = await res.text();
+  let json: any = {};
+
+  try {
+    json = rawText ? JSON.parse(rawText) : {};
+  } catch {
+    json = {};
+  }
+
   if (!res.ok) {
-    throw new Error(json?.error || "Falha ao gerar notícias com IA");
+    console.error("generate-news-drafts status:", res.status);
+    console.error("generate-news-drafts response:", rawText);
+
+    throw new Error(
+      json?.error ||
+      rawText ||
+      `Falha ao gerar notícias com IA. Status: ${res.status}`
+    );
   }
 
   return json as { inserted?: number };
