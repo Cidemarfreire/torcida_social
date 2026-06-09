@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
-import { STATS, formatInt } from "@/lib/mock-data";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database, Tables } from "@/integrations/supabase/types";
 import { formatNewsDate, NEWS_TOPIC_LABELS, NEWS_TOPICS } from "@/lib/news";
@@ -153,43 +152,15 @@ function Admin() {
         </div>
       </section>
 
-      <section className="px-6 py-12 max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card label="Torcedores ativos" value={formatInt(STATS.torcedores)} delta="+12,4%" />
-        <Card label="Doações no mês" value="R$ 318.420" delta="+8,2%" />
-        <Card label="Crianças cadastradas" value={formatInt(STATS.criancas)} delta="+3,1%" />
-        <Card label="Núcleos" value="8" delta="+1 mês" />
-      </section>
 
       <section id="noticias-admin" className="px-6 pt-4 pb-24 max-w-7xl mx-auto">
         <div className="bg-card border border-navy/5 rounded-3xl overflow-hidden mb-8">
           <div className="px-6 py-5 border-b border-navy/5 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
               <h2 className="font-display text-xl font-black">
-                RSS · Curadoria
+                Gerenciar Notícias
               </h2>
-              <p className="text-sm text-navy/60 mt-1">
-                Prioridade para Brasileirão, clubes da Série A, Seleção Brasileira,
-                Copa do Mundo e esporte social.
-              </p>
             </div>
-<div className="mt-8">
-  <a
-    href="/torcida"
-    className="block rounded-3xl border border-yellow-400/20 bg-yellow-400/10 p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/50"
-  >
-    <p className="text-sm font-bold uppercase tracking-[0.2em] text-yellow-600">
-      Moderação Inteligente
-    </p>
-
-    <h2 className="mt-3 text-3xl font-black text-slate-950">
-      Moderar Arquibancada Digital
-    </h2>
-
-    <p className="mt-3 text-slate-700">
-      Aprovar mensagens, bloquear spam, destacar torcedores e acompanhar a atividade do mural em tempo real.
-    </p>
-  </a>
-</div>
             <button
               type="button"
               onClick={() => generateNews.mutate()}
@@ -369,25 +340,6 @@ function Admin() {
   );
 }
 
-function Card({
-  label,
-  value,
-  delta,
-}: {
-  label: string;
-  value: string | number;
-  delta: string;
-}) {
-  return (
-    <div className="bg-card border border-navy/5 rounded-2xl p-6 shadow-sm">
-      <p className="text-[11px] font-bold uppercase tracking-widest text-navy/50">
-        {label}
-      </p>
-      <p className="font-display text-3xl font-black mt-1 text-navy">{value}</p>
-      <p className="text-xs font-bold text-success mt-2">{delta}</p>
-    </div>
-  );
-}
 
 type NewsDraft = Tables<"news_drafts">;
 type NewsStatus = Database["public"]["Enums"]["news_status"];
