@@ -411,9 +411,15 @@ async function updateNewsStatus({
   id: string;
   status: NewsStatus;
 }) {
+  const updateData: { status: NewsStatus; published_at?: string } = { status };
+  
+  if (status === "published") {
+    updateData.published_at = new Date().toISOString();
+  }
+
   const { error } = await supabase
     .from("news_drafts")
-    .update({ status })
+    .update(updateData)
     .eq("id", id);
 
   if (error) throw error;

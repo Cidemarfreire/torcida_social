@@ -110,6 +110,23 @@ function extractImage(item: string) {
   return img?.[1] || null;
 }
 
+function extractPubDate(item: string) {
+  const pubDate = extractTag(item, "pubDate");
+  if (!pubDate) return null;
+
+  const date = new Date(pubDate);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+function isRecentNews(pubDate: Date | null): boolean {
+  if (!pubDate) return true; // Se não tiver data, assume recente
+
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  return pubDate >= sevenDaysAgo;
+}
+
 function createSlug(title: string) {
   const base = (title || "noticia-futebol")
     .toLowerCase()
@@ -249,18 +266,21 @@ async function fetchRssItems(queryConfig: typeof NEWS_QUERIES[number]) {
       const title = stripHtml(extractCdata(extractTag(item, "title")));
       const summary = stripHtml(extractCdata(extractTag(item, "description")));
       const source = extractCdata(extractTag(item, "link"));
-      const image_url = extractImage(item) || FALLBACK_IMAGE;
+      const pubDate = extractPubDate(item);
+      const image_url = extractImage(item);
 
       return {
         title,
         summary,
         source,
         image_url,
+        pubDate,
         score: scoreNews(title, summary, queryConfig.label),
       };
     })
     .filter((item) => item.title && item.source)
     .filter((item) => hasBrazilFocus(item.title, item.summary))
+    .filter((item) => isRecentNews(item.pubDate))
     .sort((a, b) => b.score - a.score)
     .slice(0, 1)
     .map(
