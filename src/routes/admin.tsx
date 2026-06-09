@@ -138,7 +138,7 @@ function Admin() {
               Voltar ao Perfil
             </a>
             <a
-              href="/admin.arquibancada"
+              href="/torcida"
               className="bg-navy/5 border border-navy/10 hover:border-action hover:bg-action/10 px-4 py-3 rounded-xl text-xs font-bold text-navy hover:text-action transition-all text-center"
             >
               Arquibancada
@@ -174,7 +174,7 @@ function Admin() {
             </div>
 <div className="mt-8">
   <a
-    href="/admin.arquibancada"
+    href="/torcida"
     className="block rounded-3xl border border-yellow-400/20 bg-yellow-400/10 p-6 shadow-xl transition hover:-translate-y-1 hover:border-yellow-400/50"
   >
     <p className="text-sm font-bold uppercase tracking-[0.2em] text-yellow-600">
