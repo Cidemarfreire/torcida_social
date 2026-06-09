@@ -62,13 +62,8 @@ function Noticias() {
       <PageHero
         eyebrow="Central de Noticias"
         title="O que esta rolando na torcida."
-        subtitle="Notícias, histórias e movimentos do esporte que inspiram solidariedade, inclusão e transformação social."
-      >
-        <div className="mt-6 inline-flex items-center gap-2 bg-gold/15 border border-gold/40 text-navy text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full">
-          <Rss size={14} className="text-action" />
-          Paixão que informa. Torcida que transforma.
-        </div>
-      </PageHero>
+        subtitle="Notícias, histórias e movimentos do esporte que inspiram solidariedade."
+      />
 
       {isUserAdmin && (
         <section className="px-6 py-4 max-w-7xl mx-auto">
@@ -151,6 +146,16 @@ function TopicTab({
 }
 
 function NewsGrid({ news }: { news: NewsDraft[] }) {
+  if (news.length === 0) {
+    return (
+      <div className="bg-card border border-navy/5 rounded-3xl p-10 text-center">
+        <p className="font-display text-2xl font-black text-navy">
+          Nenhuma notícia publicada ainda.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {news.map((item) => (
@@ -232,9 +237,6 @@ function LoadingState() {
       <p className="mt-4 font-display text-2xl font-black">
         Carregando noticias...
       </p>
-      <p className="mt-2 text-navy/60">
-        Buscando os conteudos aprovados pela curadoria.
-      </p>
     </div>
   );
 }
@@ -258,14 +260,9 @@ function BrasileiraoTable() {
   if (isLoading) {
     return (
       <div className="bg-card border border-navy/5 rounded-3xl p-6 shadow-sm">
-        <div className="mb-6">
-          <h2 className="font-display text-2xl font-black text-navy">
-            Tabela do Brasileirão
-          </h2>
-          <p className="text-sm text-navy/60 mt-1">
-            Acompanhe a classificação, pontos e posição dos clubes.
-          </p>
-        </div>
+        <h2 className="font-display text-2xl font-black text-navy mb-6">
+          Tabela do Brasileirão
+        </h2>
         <div className="bg-surface rounded-xl p-8 text-center">
           <Newspaper className="mx-auto text-navy/30 mb-4 animate-pulse" size={48} />
           <p className="font-display text-lg font-black text-navy mb-2">
@@ -279,21 +276,13 @@ function BrasileiraoTable() {
   if (isError || !standingsData?.standings) {
     return (
       <div className="bg-card border border-navy/5 rounded-3xl p-6 shadow-sm">
-        <div className="mb-6">
-          <h2 className="font-display text-2xl font-black text-navy">
-            Tabela do Brasileirão
-          </h2>
-          <p className="text-sm text-navy/60 mt-1">
-            Acompanhe a classificação, pontos e posição dos clubes.
-          </p>
-        </div>
+        <h2 className="font-display text-2xl font-black text-navy mb-6">
+          Tabela do Brasileirão
+        </h2>
         <div className="bg-surface rounded-xl p-8 text-center">
           <Newspaper className="mx-auto text-navy/30 mb-4" size={48} />
           <p className="font-display text-lg font-black text-navy mb-2">
             Classificação em atualização
-          </p>
-          <p className="text-sm text-navy/60">
-            Tente novamente em instantes.
           </p>
         </div>
       </div>
@@ -302,14 +291,9 @@ function BrasileiraoTable() {
 
   return (
     <div className="bg-card border border-navy/5 rounded-3xl p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="font-display text-2xl font-black text-navy">
-          Tabela do Brasileirão
-        </h2>
-        <p className="text-sm text-navy/60 mt-1">
-          Acompanhe a classificação, pontos e posição dos clubes.
-        </p>
-      </div>
+      <h2 className="font-display text-2xl font-black text-navy mb-6">
+        Tabela do Brasileirão
+      </h2>
 
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
