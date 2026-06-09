@@ -12,10 +12,18 @@ export const generateNewsDraftsNow = createServerFn({ method: "POST" }).handler(
   const secret = process.env.GENERATE_NEWS_SECRET;
   const url = getGenerateNewsUrl();
 
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!anonKey) {
+    throw new Error("SUPABASE_ANON_KEY não configurada para chamar generate-news-drafts");
+  }
+
   const res = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "apikey": anonKey,
+      "Authorization": `Bearer ${anonKey}`,
       ...(secret && { "x-generate-news-secret": secret }),
     },
   });
