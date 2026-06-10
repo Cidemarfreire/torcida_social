@@ -227,7 +227,7 @@ function Admin() {
                 {filteredNews.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-surface border border-navy/5 rounded-3xl p-5 grid lg:grid-cols-[220px_1fr_auto] gap-5"
+                    className="bg-surface border border-navy/5 rounded-3xl p-5 grid lg:grid-cols-[220px_1fr] gap-5"
                   >
                     <div>
                       {item.image_url ? (
@@ -284,50 +284,50 @@ function Admin() {
                           Fonte 1
                         </a>
                       )}
-                    </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <button
-                        onClick={() =>
-                          reviewNews.mutate({ id: item.id, status: "approved" })
-                        }
-                        disabled={reviewNews.isPending || deleteNews.isPending}
-                        className="bg-success text-background px-4 py-2 rounded-xl text-xs font-bold"
-                      >
-                        Aprovar
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          reviewNews.mutate({ id: item.id, status: "published" })
-                        }
-                        disabled={reviewNews.isPending || deleteNews.isPending}
-                        className="bg-action text-background px-4 py-2 rounded-xl text-xs font-bold"
-                      >
-                        Publicar
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          reviewNews.mutate({ id: item.id, status: "rejected" })
-                        }
-                        disabled={reviewNews.isPending || deleteNews.isPending}
-                        className="bg-navy/10 text-navy px-4 py-2 rounded-xl text-xs font-bold"
-                      >
-                        Rejeitar
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          if (confirm("Tem certeza que deseja apagar esta notícia?")) {
-                            deleteNews.mutate(item.id);
+                      <div className="mt-4 flex flex-wrap gap-2 border-t border-navy/10 pt-4">
+                        <button
+                          onClick={() =>
+                            reviewNews.mutate({ id: item.id, status: "approved" })
                           }
-                        }}
-                        disabled={reviewNews.isPending || deleteNews.isPending}
-                        className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold"
-                      >
-                        Apagar
-                      </button>
+                          disabled={reviewNews.isPending || deleteNews.isPending}
+                          className="bg-success text-background px-4 py-2 rounded-xl text-xs font-bold"
+                        >
+                          Aprovar
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            reviewNews.mutate({ id: item.id, status: "published" })
+                          }
+                          disabled={reviewNews.isPending || deleteNews.isPending}
+                          className="bg-action text-background px-4 py-2 rounded-xl text-xs font-bold"
+                        >
+                          Publicar
+                        </button>
+
+                        <button
+                          onClick={() =>
+                            reviewNews.mutate({ id: item.id, status: "rejected" })
+                          }
+                          disabled={reviewNews.isPending || deleteNews.isPending}
+                          className="bg-navy/10 text-navy px-4 py-2 rounded-xl text-xs font-bold"
+                        >
+                          Rejeitar
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            if (confirm("Tem certeza que deseja apagar esta notícia?")) {
+                              deleteNews.mutate(item.id);
+                            }
+                          }}
+                          disabled={reviewNews.isPending || deleteNews.isPending}
+                          className="bg-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold"
+                        >
+                          Apagar
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
