@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { ArrowRight, Newspaper, Rss } from "lucide-react";
@@ -58,7 +58,6 @@ const fallbackTopics: { topic: NewsTopic; title: string; text: string }[] = [
 ];
 
 function Home() {
-  const navigate = useNavigate();
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
