@@ -45,6 +45,8 @@ export function Footer() {
             <Link to="/quem-somos" className="hover:text-background">Quem Somos</Link>
             <Link to="/nucleos" className="hover:text-background">Núcleos & Expansão</Link>
             <Link to="/area-crianca" className="hover:text-background">Área da Criança</Link>
+            <Link to="/integracao-neuroinclusiva" className="hover:text-background">NeuroInclusão</Link>
+            <Link to="/parceiros" className="hover:text-background">Parceiros</Link>
             <Link to="/beneficios" className="hover:text-background">Benefícios</Link>
             <Link to="/empresarial" className="hover:text-background">Área Empresarial</Link>
             
