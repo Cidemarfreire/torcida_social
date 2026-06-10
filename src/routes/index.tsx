@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, Newspaper, Rss } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { ClubBadge } from "@/components/site/ClubBadge";
@@ -19,6 +19,7 @@ import criancaImg from "@/assets/crianca-bola.jpg";
 import projEsporte from "@/assets/projeto-esporte.jpg";
 import projEdu from "@/assets/projeto-educacao.jpg";
 import projCursos from "@/assets/projeto-cursos.jpg";
+import splashImage from "@/assets/splash-torcida-social.png";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -57,6 +58,34 @@ const fallbackTopics: { topic: NewsTopic; title: string; text: string }[] = [
 ];
 
 function Home() {
+  const navigate = useNavigate();
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const hasShownSplash = sessionStorage.getItem("splashShown");
+    if (!hasShownSplash) {
+      const timer = setTimeout(() => {
+        setShowSplash(false);
+        sessionStorage.setItem("splashShown", "true");
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowSplash(false);
+    }
+  }, []);
+
+  if (showSplash) {
+    return (
+      <div className="fixed inset-0 bg-navy flex items-center justify-center z-50">
+        <img
+          src={splashImage}
+          alt="Torcida Social"
+          className="max-w-full max-h-full object-contain"
+        />
+      </div>
+    );
+  }
+
   const top3 = RANKING.slice(0, 3);
   const [activeTopic, setActiveTopic] = useState<NewsTopic>("social_sports");
   const { data: publishedNews = [] } = useQuery({
