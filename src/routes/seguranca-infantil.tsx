@@ -111,10 +111,15 @@ function SegurancaInfantil() {
           </a>
         </section>
 
-        <div className="flex justify-center pt-4">
+        <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
           <Button asChild size="lg" className="bg-action hover:bg-action/90 text-white font-bold">
             <a href="mailto:contato@torcidasocial.com.br">
               Entrar em Contato
+            </a>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="border-navy/20 text-navy hover:bg-navy/5 font-bold">
+            <a href="mailto:contato@torcidasocial.com.br">
+              Enviar Denúncia
             </a>
           </Button>
         </div>
