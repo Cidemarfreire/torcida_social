@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ValidarCarteirinhaRouteImport } from './routes/validar-carteirinha'
 import { Route as TorcidaRouteImport } from './routes/torcida'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as SegurancaInfantilRouteImport } from './routes/seguranca-infantil'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as QuemSomosRouteImport } from './routes/quem-somos'
 import { Route as ProjetosRouteImport } from './routes/projetos'
@@ -55,6 +56,11 @@ const TorcidaRoute = TorcidaRouteImport.update({
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SegurancaInfantilRoute = SegurancaInfantilRouteImport.update({
+  id: '/seguranca-infantil',
+  path: '/seguranca-infantil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RankingRoute = RankingRouteImport.update({
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/projetos': typeof ProjetosRoute
   '/quem-somos': typeof QuemSomosRoute
   '/ranking': typeof RankingRoute
+  '/seguranca-infantil': typeof SegurancaInfantilRoute
   '/termos': typeof TermosRoute
   '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
@@ -263,6 +270,7 @@ export interface FileRoutesByTo {
   '/projetos': typeof ProjetosRoute
   '/quem-somos': typeof QuemSomosRoute
   '/ranking': typeof RankingRoute
+  '/seguranca-infantil': typeof SegurancaInfantilRoute
   '/termos': typeof TermosRoute
   '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
@@ -298,6 +306,7 @@ export interface FileRoutesById {
   '/projetos': typeof ProjetosRoute
   '/quem-somos': typeof QuemSomosRoute
   '/ranking': typeof RankingRoute
+  '/seguranca-infantil': typeof SegurancaInfantilRoute
   '/termos': typeof TermosRoute
   '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
@@ -334,6 +343,7 @@ export interface FileRouteTypes {
     | '/projetos'
     | '/quem-somos'
     | '/ranking'
+    | '/seguranca-infantil'
     | '/termos'
     | '/torcida'
     | '/validar-carteirinha'
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/projetos'
     | '/quem-somos'
     | '/ranking'
+    | '/seguranca-infantil'
     | '/termos'
     | '/torcida'
     | '/validar-carteirinha'
@@ -402,6 +413,7 @@ export interface FileRouteTypes {
     | '/projetos'
     | '/quem-somos'
     | '/ranking'
+    | '/seguranca-infantil'
     | '/termos'
     | '/torcida'
     | '/validar-carteirinha'
@@ -437,6 +449,7 @@ export interface RootRouteChildren {
   ProjetosRoute: typeof ProjetosRoute
   QuemSomosRoute: typeof QuemSomosRoute
   RankingRoute: typeof RankingRoute
+  SegurancaInfantilRoute: typeof SegurancaInfantilRoute
   TermosRoute: typeof TermosRoute
   TorcidaRoute: typeof TorcidaRoute
   ValidarCarteirinhaRoute: typeof ValidarCarteirinhaRoute
@@ -464,6 +477,13 @@ declare module '@tanstack/react-router' {
       path: '/termos'
       fullPath: '/termos'
       preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seguranca-infantil': {
+      id: '/seguranca-infantil'
+      path: '/seguranca-infantil'
+      fullPath: '/seguranca-infantil'
+      preLoaderRoute: typeof SegurancaInfantilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ranking': {
@@ -722,6 +742,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjetosRoute: ProjetosRoute,
   QuemSomosRoute: QuemSomosRoute,
   RankingRoute: RankingRoute,
+  SegurancaInfantilRoute: SegurancaInfantilRoute,
   TermosRoute: TermosRoute,
   TorcidaRoute: TorcidaRoute,
   ValidarCarteirinhaRoute: ValidarCarteirinhaRoute,

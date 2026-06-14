@@ -60,6 +60,7 @@ export function Footer() {
           <Link to="/privacidade" className="hover:text-background">Privacidade</Link>
           <Link to="/termos" className="hover:text-background">Termos</Link>
           <Link to="/lgpd" className="hover:text-background">LGPD</Link>
+          <Link to="/seguranca-infantil" className="hover:text-background">Segurança Infantil</Link>
         </nav>
         <span>A torcida que transforma vidas.</span>
       </div>
