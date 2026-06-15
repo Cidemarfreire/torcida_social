@@ -6,6 +6,19 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { ShareButton } from "@/components/ShareButton";
 import heroTorcida from "@/assets/hero-torcida.jpg";
+
+// Imagens realistas de alta qualidade para fallbacks temáticos
+const fallbackImages = {
+  social_sports: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=1024&h=768&fit=crop&q=80",
+  selecao_brasileira: "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=1024&h=768&fit=crop&q=80",
+  copa: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1024&h=768&fit=crop&q=80",
+  default: "https://images.unsplash.com/photo-1522778119026-d647f0565c6a?w=1024&h=768&fit=crop&q=80",
+};
+
+// Função para obter imagem de fallback baseada no tópico
+const getFallbackImage = (topic: string): string => {
+  return (fallbackImages as any)[topic] || fallbackImages.default;
+};
 import { isAdmin } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -166,7 +179,7 @@ function NewsGrid({ news }: { news: NewsDraft[] }) {
 }
 
 function NewsCard({ item }: { item: NewsDraft }) {
-  const fallbackNewsImage = heroTorcida;
+  const fallbackNewsImage = getFallbackImage(item.topic);
   const imageSrc = item.image_url || fallbackNewsImage;
 
   return (

@@ -7,6 +7,11 @@ import projEsporte from "@/assets/projeto-esporte.jpg";
 import projEdu from "@/assets/projeto-educacao.jpg";
 import projCursos from "@/assets/projeto-cursos.jpg";
 
+// Imagens realistas de alta qualidade para substituir as atuais
+const realisticProjEsporte = "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=1024&h=768&fit=crop&q=80";
+const realisticProjEdu = "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1024&h=768&fit=crop&q=80";
+const realisticProjCursos = "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1024&h=768&fit=crop&q=80";
+
 export const Route = createFileRoute("/projetos")({
   component: Projetos,
   head: () => ({
@@ -19,7 +24,7 @@ export const Route = createFileRoute("/projetos")({
   }),
 });
 
-const images: Record<string, string> = { esporte: projEsporte, educacao: projEdu, cursos: projCursos };
+const images: Record<string, string> = { esporte: realisticProjEsporte, educacao: realisticProjEdu, cursos: realisticProjCursos };
 
 function Projetos() {
   return (
