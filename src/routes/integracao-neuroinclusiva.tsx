@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { Heart, Sparkles, Users, Brain, HandHeart, Home } from "lucide-react";
 import criancaImg from "@/assets/crianca-neuroinclusao.jpg";
+import neuroInclusivaImg from "@/assets/neuro-inclusiva.png";
 
 export const Route = createFileRoute("/integracao-neuroinclusiva")({
   component: NeuroInclusiva,
@@ -63,7 +64,7 @@ function NeuroInclusiva() {
 
           <div className="relative">
             <img
-              src={criancaImg}
+              src={neuroInclusivaImg}
               alt="Criança acolhida no espaço de Integração NeuroInclusiva da Torcida Social"
               width={1024}
               height={1024}
