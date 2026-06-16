@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ValidarCarteirinhaRouteImport } from './routes/validar-carteirinha'
 import { Route as TorcidaRouteImport } from './routes/torcida'
 import { Route as TermosRouteImport } from './routes/termos'
+import { Route as SplashRouteImport } from './routes/splash'
 import { Route as SegurancaInfantilRouteImport } from './routes/seguranca-infantil'
 import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as QuemSomosRouteImport } from './routes/quem-somos'
@@ -56,6 +57,11 @@ const TorcidaRoute = TorcidaRouteImport.update({
 const TermosRoute = TermosRouteImport.update({
   id: '/termos',
   path: '/termos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplashRoute = SplashRouteImport.update({
+  id: '/splash',
+  path: '/splash',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SegurancaInfantilRoute = SegurancaInfantilRouteImport.update({
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/quem-somos': typeof QuemSomosRoute
   '/ranking': typeof RankingRoute
   '/seguranca-infantil': typeof SegurancaInfantilRoute
+  '/splash': typeof SplashRoute
   '/termos': typeof TermosRoute
   '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
@@ -271,6 +278,7 @@ export interface FileRoutesByTo {
   '/quem-somos': typeof QuemSomosRoute
   '/ranking': typeof RankingRoute
   '/seguranca-infantil': typeof SegurancaInfantilRoute
+  '/splash': typeof SplashRoute
   '/termos': typeof TermosRoute
   '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
@@ -307,6 +315,7 @@ export interface FileRoutesById {
   '/quem-somos': typeof QuemSomosRoute
   '/ranking': typeof RankingRoute
   '/seguranca-infantil': typeof SegurancaInfantilRoute
+  '/splash': typeof SplashRoute
   '/termos': typeof TermosRoute
   '/torcida': typeof TorcidaRoute
   '/validar-carteirinha': typeof ValidarCarteirinhaRoute
@@ -344,6 +353,7 @@ export interface FileRouteTypes {
     | '/quem-somos'
     | '/ranking'
     | '/seguranca-infantil'
+    | '/splash'
     | '/termos'
     | '/torcida'
     | '/validar-carteirinha'
@@ -379,6 +389,7 @@ export interface FileRouteTypes {
     | '/quem-somos'
     | '/ranking'
     | '/seguranca-infantil'
+    | '/splash'
     | '/termos'
     | '/torcida'
     | '/validar-carteirinha'
@@ -414,6 +425,7 @@ export interface FileRouteTypes {
     | '/quem-somos'
     | '/ranking'
     | '/seguranca-infantil'
+    | '/splash'
     | '/termos'
     | '/torcida'
     | '/validar-carteirinha'
@@ -450,6 +462,7 @@ export interface RootRouteChildren {
   QuemSomosRoute: typeof QuemSomosRoute
   RankingRoute: typeof RankingRoute
   SegurancaInfantilRoute: typeof SegurancaInfantilRoute
+  SplashRoute: typeof SplashRoute
   TermosRoute: typeof TermosRoute
   TorcidaRoute: typeof TorcidaRoute
   ValidarCarteirinhaRoute: typeof ValidarCarteirinhaRoute
@@ -477,6 +490,13 @@ declare module '@tanstack/react-router' {
       path: '/termos'
       fullPath: '/termos'
       preLoaderRoute: typeof TermosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/splash': {
+      id: '/splash'
+      path: '/splash'
+      fullPath: '/splash'
+      preLoaderRoute: typeof SplashRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seguranca-infantil': {
@@ -743,6 +763,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuemSomosRoute: QuemSomosRoute,
   RankingRoute: RankingRoute,
   SegurancaInfantilRoute: SegurancaInfantilRoute,
+  SplashRoute: SplashRoute,
   TermosRoute: TermosRoute,
   TorcidaRoute: TorcidaRoute,
   ValidarCarteirinhaRoute: ValidarCarteirinhaRoute,

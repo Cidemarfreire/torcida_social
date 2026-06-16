@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, Newspaper, Rss } from "lucide-react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { ClubBadge } from "@/components/site/ClubBadge";
@@ -65,6 +65,15 @@ const fallbackTopics: { topic: NewsTopic; title: string; text: string }[] = [
 ];
 
 function Home() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    const hasSeenSplash = localStorage.getItem("hasSeenSplash");
+    if (!hasSeenSplash) {
+      router.navigate({ to: "/splash" as any });
+    }
+  }, [router]);
+
   const top3 = RANKING.slice(0, 3);
   const [activeTopic, setActiveTopic] = useState<NewsTopic>("social_sports");
   const { data: publishedNews = [] } = useQuery({
