@@ -19,9 +19,10 @@ import criancaImg from "@/assets/crianca-bola.jpg";
 import projEsporte from "@/assets/projeto-esporte.jpg";
 import projEdu from "@/assets/projeto-educacao.jpg";
 import projCursos from "@/assets/projeto-cursos.jpg";
+import torcidaFutebol from "@/assets/torcida-futebol.png";
 
 // Imagens realistas de alta qualidade para substituir as atuais
-const realisticHeroImg = "https://images.unsplash.com/photo-1522778119026-d647f0565c6a?w=1024&h=1280&fit=crop&q=80";
+const realisticHeroImg = torcidaFutebol;
 const realisticCriancaImg = "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1024&h=1024&fit=crop&q=80";
 const realisticProjEsporte = "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=1024&h=768&fit=crop&q=80";
 const realisticProjEdu = "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1024&h=768&fit=crop&q=80";
