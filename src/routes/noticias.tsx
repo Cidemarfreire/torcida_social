@@ -183,15 +183,18 @@ function NewsCard({ item }: { item: NewsDraft }) {
   const imageSrc = item.image_url || fallbackNewsImage;
 
   return (
-    <article className="bg-card border border-navy/5 rounded-3xl overflow-hidden hover:border-action transition-colors">
-      <img
-        src={imageSrc}
-        alt={item.title}
-        className="w-full h-48 object-cover border-b border-navy/10"
-        onError={(event) => {
-          event.currentTarget.src = fallbackNewsImage;
-        }}
-      />
+    <article className="bg-card border border-navy/5 rounded-3xl overflow-hidden hover:border-action transition-all hover:shadow-lg">
+      <div className="relative aspect-[16/9] overflow-hidden">
+        <img
+          src={imageSrc}
+          alt={item.title}
+          className="w-full h-full object-cover"
+          onError={(event) => {
+            event.currentTarget.src = fallbackNewsImage;
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy/20 to-transparent" />
+      </div>
       <div className="p-6">
         <div className="flex flex-wrap items-center gap-3 text-xs mb-4">
           <span className="bg-action/10 text-action font-bold uppercase tracking-wider px-3 py-1 rounded-full">
@@ -303,46 +306,71 @@ function BrasileiraoTable() {
   }
 
   return (
-    <div className="bg-card border border-navy/5 rounded-3xl p-6 shadow-sm">
-      <h2 className="font-display text-2xl font-black text-navy mb-6">
-        Tabela do Brasileirão
-      </h2>
+    <div className="bg-gradient-to-br from-navy/5 to-card border border-navy/10 rounded-3xl p-6 shadow-lg">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="font-display text-2xl md:text-3xl font-black text-navy">
+            Tabela do Brasileirão
+          </h2>
+          <p className="text-sm text-navy/60 mt-1">Classificação atual da Série A</p>
+        </div>
+        <div className="flex gap-2">
+          <div className="flex items-center gap-1 bg-success/10 px-3 py-1.5 rounded-lg">
+            <div className="w-2 h-2 rounded-full bg-success" />
+            <span className="text-xs font-bold text-success">Libertadores</span>
+          </div>
+          <div className="flex items-center gap-1 bg-red-500/10 px-3 py-1.5 rounded-lg">
+            <div className="w-2 h-2 rounded-full bg-red-500" />
+            <span className="text-xs font-bold text-red-600">Rebaixamento</span>
+          </div>
+        </div>
+      </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-2xl border border-navy/10">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-navy/10">
-              <th className="text-left font-bold text-navy/50 uppercase tracking-wider py-3 px-2">Pos.</th>
-              <th className="text-left font-bold text-navy/50 uppercase tracking-wider py-3 px-2">Time</th>
-              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">Pts</th>
-              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">J</th>
-              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">V</th>
-              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">E</th>
-              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">D</th>
-              <th className="text-center font-bold text-navy/50 uppercase tracking-wider py-3 px-2">SG</th>
+            <tr className="bg-navy text-background">
+              <th className="text-left font-bold uppercase tracking-wider py-4 px-3">#</th>
+              <th className="text-left font-bold uppercase tracking-wider py-4 px-3">Time</th>
+              <th className="text-center font-bold uppercase tracking-wider py-4 px-3">Pts</th>
+              <th className="text-center font-bold uppercase tracking-wider py-4 px-3">J</th>
+              <th className="text-center font-bold uppercase tracking-wider py-4 px-3">V</th>
+              <th className="text-center font-bold uppercase tracking-wider py-4 px-3">E</th>
+              <th className="text-center font-bold uppercase tracking-wider py-4 px-3">D</th>
+              <th className="text-center font-bold uppercase tracking-wider py-4 px-3">SG</th>
             </tr>
           </thead>
           <tbody>
-            {standingsData.standings.map((team: any) => (
-              <tr key={team.position} className="border-b border-navy/5 hover:bg-navy/5 transition-colors">
-                <td className="py-3 px-2">
-                  <span className="font-display font-black text-navy">{team.position}</span>
-                  {team.position <= 4 && (
-                    <span className="ml-2 bg-success/20 text-success text-[10px] font-bold px-2 py-0.5 rounded-full">G4</span>
-                  )}
-                  {team.position >= 17 && (
-                    <span className="ml-2 bg-red-500/20 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full">Z4</span>
-                  )}
-                </td>
-                <td className="py-3 px-2 font-bold text-navy">{team.teamName}</td>
-                <td className="py-3 px-2 text-center font-display font-black text-navy">{team.points}</td>
-                <td className="py-3 px-2 text-center text-navy/70">{team.playedGames}</td>
-                <td className="py-3 px-2 text-center text-success font-bold">{team.won}</td>
-                <td className="py-3 px-2 text-center text-navy/70">{team.draw}</td>
-                <td className="py-3 px-2 text-center text-red-600 font-bold">{team.lost}</td>
-                <td className="py-3 px-2 text-center font-display font-bold text-navy/70">{team.goalDifference}</td>
-              </tr>
-            ))}
+            {standingsData.standings.map((team: any, index: number) => {
+              const isG4 = team.position <= 4;
+              const isZ4 = team.position >= 17;
+              const rowBg = isG4 ? 'bg-success/5' : isZ4 ? 'bg-red-500/5' : index % 2 === 0 ? 'bg-surface' : 'bg-card';
+              
+              return (
+                <tr key={team.position} className={`${rowBg} hover:bg-navy/10 transition-colors border-b border-navy/5 last:border-b-0`}>
+                  <td className="py-4 px-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`font-display font-black ${isG4 ? 'text-success' : isZ4 ? 'text-red-600' : 'text-navy'}`}>
+                        {team.position}
+                      </span>
+                      {isG4 && (
+                        <span className="bg-success text-background text-[10px] font-bold px-2 py-0.5 rounded-full">G4</span>
+                      )}
+                      {isZ4 && (
+                        <span className="bg-red-600 text-background text-[10px] font-bold px-2 py-0.5 rounded-full">Z4</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="py-4 px-3 font-bold text-navy">{team.teamName}</td>
+                  <td className="py-4 px-3 text-center font-display font-black text-navy text-sm">{team.points}</td>
+                  <td className="py-4 px-3 text-center text-navy/70">{team.playedGames}</td>
+                  <td className="py-4 px-3 text-center text-success font-bold">{team.won}</td>
+                  <td className="py-4 px-3 text-center text-navy/70">{team.draw}</td>
+                  <td className="py-4 px-3 text-center text-red-600 font-bold">{team.lost}</td>
+                  <td className="py-4 px-3 text-center font-display font-bold text-navy/70">{team.goalDifference}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
