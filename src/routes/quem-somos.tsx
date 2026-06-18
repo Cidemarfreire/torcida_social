@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { PageHero } from "@/components/site/PageHero";
 import { ShareButton } from "@/components/ShareButton";
-import criancaImg from "@/assets/crianca-bola.jpg";
 
 export const Route = createFileRoute("/quem-somos")({
   component: QuemSomos,
@@ -26,7 +25,7 @@ function QuemSomos() {
       />
 
       <section className="px-6 py-16 max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
-        <img src={criancaImg} alt="Criança apoiada pela Torcida Social" width={1024} height={1024} loading="lazy" className="w-full aspect-square object-cover rounded-3xl" />
+        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1024&h=1024&fit=crop&q=80" alt="Criança apoiada pela Torcida Social" width={1024} height={1024} loading="lazy" className="w-full aspect-square object-cover rounded-3xl" />
         <div className="space-y-6">
           <h2 className="font-display text-3xl font-black">Missão</h2>
           <p className="text-navy/70 leading-relaxed text-lg">
