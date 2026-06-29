@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { DashboardMetricas } from "@/components/admin/modules/DashboardMetricas";
+import { DashboardCadastros } from "@/components/admin/modules/DashboardCadastros";
 import { SiteLayout } from "@/components/site/SiteLayout";
 
 type ActiveSection = "home" | "cadastros" | "noticias" | "metricas" | "criancas";
@@ -113,12 +114,7 @@ function PainelExecutivo() {
           </div>
         )}
 
-        {activeSection === "cadastros" && (
-          <PlaceholderModule
-            title="👥 Cadastro Geral"
-            description="Aqui entraremos com a gestão completa de usuários, permissões, filtros e edição de cadastros."
-          />
-        )}
+        {activeSection === "cadastros" && <DashboardCadastros />}
 
         {activeSection === "noticias" && (
           <PlaceholderModule
