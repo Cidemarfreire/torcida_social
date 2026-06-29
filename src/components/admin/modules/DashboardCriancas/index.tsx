@@ -1,10 +1,14 @@
 import { useState } from "react";
 
 import { CriancaDrawer } from "./CriancaDrawer";
-import { CriancasFilters } from "./CriancasFilters";
+import {
+  CriancasFilters,
+  type ChildrenFilter,
+} from "./CriancasFilters";
 import { CriancasTable } from "./CriancasTable";
 import { CriancasToolbar } from "./CriancasToolbar";
 import type { ChildProfile } from "./types";
+
 const mockChildren: ChildProfile[] = [
   {
     id: "1",
@@ -87,19 +91,30 @@ const mockChildren: ChildProfile[] = [
 ];
 
 export function DashboardCriancas() {
-  const [selectedChild, setSelectedChild] = useState<ChildProfile | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+ const [selectedChild, setSelectedChild] = useState<ChildProfile | null>(null);
+const [searchTerm, setSearchTerm] = useState("");
+const [activeFilter, setActiveFilter] = useState<ChildrenFilter>("all");
 
   const filteredChildren = mockChildren.filter((child) => {
-    const term = searchTerm.toLowerCase();
+  const term = searchTerm.toLowerCase();
 
-    return (
-      child.fullName.toLowerCase().includes(term) ||
-      child.nucleus.toLowerCase().includes(term) ||
-      child.guardian.name.toLowerCase().includes(term) ||
-      child.guardian.whatsapp.toLowerCase().includes(term)
-    );
-  });
+  const matchesSearch =
+    child.fullName.toLowerCase().includes(term) ||
+    child.nucleus.toLowerCase().includes(term) ||
+    child.guardian.name.toLowerCase().includes(term) ||
+    child.guardian.whatsapp.toLowerCase().includes(term);
+
+  const matchesFilter =
+    activeFilter === "all" ||
+    child.status === activeFilter ||
+    (activeFilter === "specialCare" &&
+      Boolean(
+        child.health.specialCare ||
+        child.health.medicalConditions
+      ));
+
+  return matchesSearch && matchesFilter;
+});
 
   return (
     <div className="space-y-8">
