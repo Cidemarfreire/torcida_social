@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { DashboardMetricas } from "@/components/admin/modules/DashboardMetricas";
 import { DashboardCadastros } from "@/components/admin/modules/DashboardCadastros";
+import { DashboardCriancas } from "@/components/admin/modules/DashboardCriancas";
+import { DashboardMetricas } from "@/components/admin/modules/DashboardMetricas";
 import { SiteLayout } from "@/components/site/SiteLayout";
 
 type ActiveSection = "home" | "cadastros" | "noticias" | "metricas" | "criancas";
@@ -125,12 +126,7 @@ function PainelExecutivo() {
 
         {activeSection === "metricas" && <DashboardMetricas />}
 
-        {activeSection === "criancas" && (
-          <PlaceholderModule
-            title="👶 Central Infantil"
-            description="Aqui entraremos com prontuários, responsáveis, WhatsApp, saúde, medicamentos, horários e observações."
-          />
-        )}
+        {activeSection === "criancas" && <DashboardCriancas />}
       </section>
     </SiteLayout>
   );
