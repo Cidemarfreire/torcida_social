@@ -77,9 +77,9 @@ export function CriancasTable({
                   {child.guardian.whatsapp}
                 </td>
 
-                <td className="px-6 py-5">
+                <td className="px-6 py-4">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-black ${
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ${
                       child.status === "active"
                         ? "bg-green-100 text-green-700"
                         : child.status === "pending"
@@ -87,16 +87,21 @@ export function CriancasTable({
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {child.status}
+                    {child.status === "active"
+                      ? "🟢 Ativo"
+                      : child.status === "pending"
+                      ? "🟡 Pendente"
+                      : "🔴 Inativo"}
                   </span>
                 </td>
 
                 <td className="px-6 py-5 text-right">
                   <button
+                    type="button"
                     onClick={() => onOpenChild(child)}
-                    className="bg-action text-white rounded-xl px-4 py-2 text-xs font-black hover:opacity-90"
+                    className="bg-navy border border-navy/10 text-white rounded-xl px-5 py-2 text-xs font-black hover:bg-action hover:border-action transition-all"
                   >
-                    Abrir
+                    Prontuário
                   </button>
                 </td>
               </tr>

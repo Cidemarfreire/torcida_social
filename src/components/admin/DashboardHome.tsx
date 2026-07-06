@@ -1,7 +1,6 @@
 type DashboardHomeProps = {
   onOpenCadastros: () => void;
   onOpenCriancas: () => void;
-  onOpenNoticias: () => void;
   onOpenMetricas: () => void;
 };
 
@@ -19,12 +18,6 @@ const quickCards = [
     icon: "👶",
   },
   {
-    title: "Notícias",
-    value: "Redação",
-    description: "Colete, aprove, publique ou apague notícias.",
-    icon: "📰",
-  },
-  {
     title: "Métricas",
     value: "Insights",
     description: "Acompanhe visitas, cadastros e crescimento.",
@@ -35,13 +28,11 @@ const quickCards = [
 export function DashboardHome({
   onOpenCadastros,
   onOpenCriancas,
-  onOpenNoticias,
   onOpenMetricas,
 }: DashboardHomeProps) {
   const actions = [
     onOpenCadastros,
     onOpenCriancas,
-    onOpenNoticias,
     onOpenMetricas,
   ];
 
@@ -58,12 +49,12 @@ export function DashboardHome({
 
         <p className="text-navy/60 mt-3 max-w-3xl">
           Este painel foi estruturado para administrar usuários, crianças,
-          notícias, métricas, parceiros, doações e configurações do ecossistema
+          métricas, parceiros, doações e configurações do ecossistema
           Torcida Social em um único ambiente.
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
         {quickCards.map((card, index) => (
           <button
             key={card.title}

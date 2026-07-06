@@ -20,7 +20,6 @@ import { Route as ProjetosRouteImport } from './routes/projetos'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as ParceirosRouteImport } from './routes/parceiros'
-import { Route as PainelExecutivoRouteImport } from './routes/painel-executivo'
 import { Route as NucleosRouteImport } from './routes/nucleos'
 import { Route as NoticiasRouteImport } from './routes/noticias'
 import { Route as MuralRouteImport } from './routes/mural'
@@ -98,11 +97,6 @@ const PerfilRoute = PerfilRouteImport.update({
 const ParceirosRoute = ParceirosRouteImport.update({
   id: '/parceiros',
   path: '/parceiros',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PainelExecutivoRoute = PainelExecutivoRouteImport.update({
-  id: '/painel-executivo',
-  path: '/painel-executivo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NucleosRoute = NucleosRouteImport.update({
@@ -241,7 +235,6 @@ export interface FileRoutesByFullPath {
   '/mural': typeof MuralRoute
   '/noticias': typeof NoticiasRoute
   '/nucleos': typeof NucleosRoute
-  '/painel-executivo': typeof PainelExecutivoRoute
   '/parceiros': typeof ParceirosRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -278,7 +271,6 @@ export interface FileRoutesByTo {
   '/mural': typeof MuralRoute
   '/noticias': typeof NoticiasRoute
   '/nucleos': typeof NucleosRoute
-  '/painel-executivo': typeof PainelExecutivoRoute
   '/parceiros': typeof ParceirosRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -316,7 +308,6 @@ export interface FileRoutesById {
   '/mural': typeof MuralRoute
   '/noticias': typeof NoticiasRoute
   '/nucleos': typeof NucleosRoute
-  '/painel-executivo': typeof PainelExecutivoRoute
   '/parceiros': typeof ParceirosRoute
   '/perfil': typeof PerfilRoute
   '/privacidade': typeof PrivacidadeRoute
@@ -355,7 +346,6 @@ export interface FileRouteTypes {
     | '/mural'
     | '/noticias'
     | '/nucleos'
-    | '/painel-executivo'
     | '/parceiros'
     | '/perfil'
     | '/privacidade'
@@ -392,7 +382,6 @@ export interface FileRouteTypes {
     | '/mural'
     | '/noticias'
     | '/nucleos'
-    | '/painel-executivo'
     | '/parceiros'
     | '/perfil'
     | '/privacidade'
@@ -429,7 +418,6 @@ export interface FileRouteTypes {
     | '/mural'
     | '/noticias'
     | '/nucleos'
-    | '/painel-executivo'
     | '/parceiros'
     | '/perfil'
     | '/privacidade'
@@ -467,7 +455,6 @@ export interface RootRouteChildren {
   MuralRoute: typeof MuralRoute
   NoticiasRoute: typeof NoticiasRoute
   NucleosRoute: typeof NucleosRoute
-  PainelExecutivoRoute: typeof PainelExecutivoRoute
   ParceirosRoute: typeof ParceirosRoute
   PerfilRoute: typeof PerfilRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
@@ -559,13 +546,6 @@ declare module '@tanstack/react-router' {
       path: '/parceiros'
       fullPath: '/parceiros'
       preLoaderRoute: typeof ParceirosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/painel-executivo': {
-      id: '/painel-executivo'
-      path: '/painel-executivo'
-      fullPath: '/painel-executivo'
-      preLoaderRoute: typeof PainelExecutivoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/nucleos': {
@@ -776,7 +756,6 @@ const rootRouteChildren: RootRouteChildren = {
   MuralRoute: MuralRoute,
   NoticiasRoute: NoticiasRoute,
   NucleosRoute: NucleosRoute,
-  PainelExecutivoRoute: PainelExecutivoRoute,
   ParceirosRoute: ParceirosRoute,
   PerfilRoute: PerfilRoute,
   PrivacidadeRoute: PrivacidadeRoute,
