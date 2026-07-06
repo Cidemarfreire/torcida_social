@@ -10,7 +10,7 @@ import type { Tables } from "@/integrations/supabase/types";
 export const Route = createFileRoute("/area-crianca")({
   component: AreaCrianca,
   head: () => ({ meta: [
-    { title: "Área da Criança — Torcida Social" },
+    { title: "Cadastro Infantil — Torcida Social" },
     { name: "description", content: "Cadastro infantil, carteirinha digital e acompanhamento pedagógico das crianças da Torcida Social." },
   ]}),
 });
@@ -19,6 +19,7 @@ function AreaCrianca() {
   const [form, setForm] = useState({
     childName: "",
     age: "",
+    childCpf: "",
     school: "",
     nucleus: "",
     guardianName: "",
@@ -26,6 +27,9 @@ function AreaCrianca() {
     guardianEmail: "",
     guardianPhone: "",
     address: "",
+    allergies: "",
+    healthNotes: "",
+    neuroNeeds: "",
     consent: false,
   });
   const [sports, setSports] = useState<string[]>([]);
@@ -44,9 +48,7 @@ function AreaCrianca() {
     setLoading(true);
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
         throw new Error("Entre na sua conta para cadastrar uma criança.");
@@ -61,12 +63,13 @@ function AreaCrianca() {
         throw new Error("Informe uma idade válida entre 0 e 17 anos.");
       }
 
+      // 1. Cadastra ou vincula o Responsável
       const { data: guardian, error: guardianError } = await supabase
         .from("guardians")
         .insert({
           user_id: user.id,
           full_name: form.guardianName.trim(),
-          document_number: form.guardianDocument.trim() || null,
+          document_number: form.guardianDocument.trim(),
           email: form.guardianEmail.trim() || user.email || null,
           phone: form.guardianPhone.trim(),
           relationship: "legal_guardian",
@@ -76,16 +79,21 @@ function AreaCrianca() {
 
       if (guardianError) throw guardianError;
 
+      // 2. Cadastra a Criança com os campos de Saúde e Documentos
       const { data: createdChild, error: childError } = await supabase
         .from("children")
         .insert({
           guardian_id: guardian.id,
           full_name: form.childName.trim(),
           age,
+          child_cpf: form.childCpf.trim() || null,
           school: form.school.trim() || null,
           nucleus: form.nucleus.trim(),
           address: form.address.trim() || null,
           sports_interests: sports,
+          allergies: form.allergies.trim() || null,
+          health_notes: form.healthNotes.trim() || null,
+          neuro_needs: form.neuroNeeds.trim() || null,
         })
         .select("*")
         .single();
@@ -120,8 +128,8 @@ function AreaCrianca() {
     }
   };
 
-  const update = (field: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.type === "checkbox" ? event.target.checked : event.target.value;
+  const update = (field: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = event.target.type === "checkbox" ? (event.target as HTMLInputElement).checked : event.target.value;
     setForm((current) => ({ ...current, [field]: value }));
   };
 
@@ -136,30 +144,52 @@ function AreaCrianca() {
   return (
     <SiteLayout>
       <PageHero
-        eyebrow="Área da Criança"
+        eyebrow="Formulário de Ingresso"
         title={<>Cada criança é <span className="text-success">titular</span> dessa torcida.</>}
-        subtitle="Cadastro com autorização do responsável, carteirinha digital, acesso a benefícios e acompanhamento pedagógico."
+        subtitle="Preenchimento obrigatório pelo responsável legal para emissão da carteirinha e controle de saúde."
       />
 
       <section className="px-6 py-16 max-w-6xl mx-auto grid lg:grid-cols-[1fr_360px] gap-10">
-        <form className="bg-card border border-navy/5 rounded-3xl p-8 md:p-10 space-y-5" onSubmit={submit}>
-          <h2 className="font-display text-2xl font-black">Novo cadastro</h2>
-          <p className="text-sm text-navy/60">Preenchimento pelo responsável legal autenticado.</p>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Nome da criança" required value={form.childName} onChange={update("childName")} />
-            <Field label="Idade" type="number" required min={0} max={17} value={form.age} onChange={update("age")} />
-            <Field label="Escola" value={form.school} onChange={update("school")} />
-            <Field label="Núcleo" required value={form.nucleus} onChange={update("nucleus")} />
-            <Field label="Nome do responsável" required value={form.guardianName} onChange={update("guardianName")} />
-            <Field label="Documento do responsável" value={form.guardianDocument} onChange={update("guardianDocument")} />
-            <Field label="E-mail do responsável" type="email" value={form.guardianEmail} onChange={update("guardianEmail")} />
-            <Field label="WhatsApp do responsável" required value={form.guardianPhone} onChange={update("guardianPhone")} />
-            <Field label="Endereço" className="md:col-span-2" value={form.address} onChange={update("address")} />
+        <form className="bg-card border border-navy/5 rounded-3xl p-8 md:p-10 space-y-6" onSubmit={submit}>
+          <h2 className="font-display text-2xl font-black">Ficha de Cadastro Oficial</h2>
+          
+          {/* SEÇÃO 1: DADOS DA CRIANÇA */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-action border-b pb-1">1. Dados da Criança</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="Nome completo da criança" required value={form.childName} onChange={update("childName")} />
+              <Field label="Idade" type="number" required min={0} max={17} value={form.age} onChange={update("age")} />
+              <Field label="CPF da Criança (Se houver)" value={form.childCpf} onChange={update("childCpf")} placeholder="000.000.000-00" />
+              <Field label="Núcleo de Atendimento" required value={form.nucleus} onChange={update("nucleus")} placeholder="Ex: Teresópolis Hub" />
+              <Field label="Escola / Colégio" className="md:col-span-2" value={form.school} onChange={update("school")} />
+            </div>
           </div>
 
+          {/* SEÇÃO 2: SAÚDE E NEURONECESSIDADES */}
+          <div className="space-y-4 pt-2">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-success border-b pb-1">2. Ficha Médica e Cuidados de Saúde</h3>
+            <div className="grid md:grid-cols-1 gap-4">
+              <AreaField label="Alergias (Restrições alimentares ou medicamentosas)" value={form.allergies} onChange={update("allergies")} placeholder="Caso não tenha, deixe em branco ou digite 'Nenhuma'." />
+              <AreaField label="Neuronecessidades / Condições de Desenvolvimento" value={form.neuroNeeds} onChange={update("neuroNeeds")} placeholder="Ex: Autismo (TEA), TDAH, Síndrome de Down, etc. (Essencial para adaptarmos os treinos e monitoramento)" />
+              <AreaField label="Outras anotações importantes sobre a saúde" value={form.healthNotes} onChange={update("healthNotes")} placeholder="Histórico médico relevante, medicamentos contínuos, etc." />
+            </div>
+          </div>
+
+          {/* SEÇÃO 3: RESPONSÁVEL LEGAL */}
+          <div className="space-y-4 pt-2">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-navy/70 border-b pb-1">3. Dados do Responsável Legal</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Field label="Nome completo do responsável" required value={form.guardianName} onChange={update("guardianName")} />
+              <Field label="RG ou CPF do responsável" required value={form.guardianDocument} onChange={update("guardianDocument")} placeholder="Documento de identificação" />
+              <Field label="WhatsApp / Telefone" required value={form.guardianPhone} onChange={update("guardianPhone")} placeholder="(00) 00000-0000" />
+              <Field label="E-mail" type="email" value={form.guardianEmail} onChange={update("guardianEmail")} />
+              <Field label="Endereço Residencial Completo" className="md:col-span-2" value={form.address} onChange={update("address")} />
+            </div>
+          </div>
+
+          {/* MODALIDADES */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-navy/50 mb-2">Interesses esportivos</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-navy/50 mb-2">Modalidades de Interesse</label>
             <div className="flex flex-wrap gap-2">
               {["Futebol de campo", "Futsal", "Vôlei", "Basquete", "Judô", "Natação", "Atletismo"].map((s) => (
                 <label key={s} className="cursor-pointer bg-surface border-2 border-navy/10 rounded-full px-4 py-2 text-sm font-bold hover:border-action transition-colors">
@@ -169,9 +199,9 @@ function AreaCrianca() {
             </div>
           </div>
 
-          <label className="flex items-start gap-3 text-sm text-navy/70">
+          <label className="flex items-start gap-3 text-sm text-navy/70 pt-2">
             <input type="checkbox" checked={form.consent} onChange={update("consent")} className="mt-1 accent-action" />
-            Autorizo, na condição de responsável legal, o cadastro e participação nas atividades.
+            Autorizo, na condição de responsável legal, o cadastro, monitoramento de saúde e participação nas atividades.
           </label>
 
           {error && (
@@ -181,10 +211,11 @@ function AreaCrianca() {
           )}
 
           <button disabled={loading} className="w-full bg-navy text-background py-5 rounded-xl font-black text-lg hover:bg-action transition-colors disabled:opacity-50">
-            {loading ? "EMITINDO..." : "EMITIR CARTEIRINHA DIGITAL"}
+            {loading ? "EMITINDO FICHA..." : "SALVAR E EMITIR CARTEIRINHA"}
           </button>
         </form>
 
+        {/* PREVIEW DA CARTEIRINHA */}
         <aside>
           <div className="bg-navy text-background rounded-3xl p-6 sticky top-28">
             <p className="text-[10px] font-bold uppercase tracking-widest text-gold">Carteirinha Digital</p>
@@ -194,40 +225,27 @@ function AreaCrianca() {
               </div>
               <div>
                 <p className="font-display font-black text-xl">
-                  {child ? child.full_name : "Aguardando cadastro"}
+                  {child ? child.full_name : "Aguardando preenchimento"}
                 </p>
                 <p className="text-xs opacity-70">
-                  {child ? `${child.age ?? "-"} anos · ${child.nucleus}` : "Carteirinha emitida após salvar"}
+                  {child ? `${child.age ?? "-"} anos · ${child.nucleus}` : "Será gerada em tempo real"}
                 </p>
               </div>
             </div>
             <div className="mt-6 aspect-square bg-background rounded-2xl grid place-items-center text-navy">
               {card ? (
-                <QRCodeSVG
-                  value={validationUrl}
-                  size={220}
-                  level="M"
-                  includeMargin
-                  fgColor="#061A40"
-                  bgColor="#FFFFFF"
-                />
+                <QRCodeSVG value={validationUrl} size={220} level="M" includeMargin fgColor="#061A40" bgColor="#FFFFFF" />
               ) : (
-                <p className="text-sm font-bold text-center px-6">QR Code de validação será gerado aqui.</p>
+                <p className="text-sm font-bold text-center px-6">QR Code de validação do projeto.</p>
               )}
             </div>
             <p className="text-[10px] font-mono mt-3 opacity-60 text-center">
               ID #{card?.display_id ?? "TS-0000-000000"}
             </p>
-            {card && (
-              <a href={validationUrl} target="_blank" rel="noreferrer" className="block text-center text-xs font-bold text-gold mt-3 underline">
-                Validar carteirinha
-              </a>
-            )}
           </div>
         </aside>
       </section>
 
-      {/* SHARE BUTTON */}
       <section className="px-6 py-8 max-w-7xl mx-auto">
         <div className="flex justify-end">
           <ShareButton />
@@ -246,13 +264,15 @@ function Field({ label, className = "", ...props }: { label: string; className?:
   );
 }
 
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
+function AreaField({ label, className = "", ...props }: { label: string; className?: string } & React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <label className={`block ${className}`}>
+      <span className="block text-xs font-bold uppercase tracking-wider text-navy/50 mb-2">{label}</span>
+      <textarea {...props} rows={2} className="w-full bg-surface border-2 border-navy/10 px-4 py-3 rounded-xl font-medium focus:border-action outline-none resize-none" />
+    </label>
+  );
 }
 
+function initials(name: string) {
+  return name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+}
