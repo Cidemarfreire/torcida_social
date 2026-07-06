@@ -11,27 +11,34 @@ export const Route = createFileRoute("/")({
 
 function ScreenUnificadaHome() {
   const navigate = useNavigate();
-  // Altera o estado para controlar as três abas a partir dos botões do painel executivo
+  // Controle das abas do painel executivo
   const [activeModule, setActiveModule] = useState<"criancas" | "metricas" | "noticias">("criancas");
   const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-  async function verificarSessao() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      // navigate({ to: "/login" }); // <-- COMENTE ESSA LINHA ADICIONANDO AS DUAS BARRAS
-      setLoading(false); // <-- ADICIONE ISSO AQUI PARA ELE LIBERAR A TELA MESMO SEM LOGAR
-    } else {
-      setLoading(false);
+  useEffect(() => {
+    async function verificarSessao() {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        // Se não houver usuário logado, vai para a tela de login
+        navigate({ to: "/login" });
+      } else if (user.email !== "cidemarfaria@gmail.com") {
+        // 🔒 TRAVA DE SEGURANÇA MÁXIMA: Se não for o seu e-mail, barra o acesso
+        console.warn("Acesso negado. Redirecionando usuário comum para o perfil.");
+        navigate({ to: "/perfil" });
+      } else {
+        // Se for o Cidemar, libera o Console Executivo completo
+        setLoading(false);
+      }
     }
-  }
-  verificarSessao();
-}, [navigate]);
+    verificarSessao();
+  }, [navigate]);
+
   if (loading) {
     return (
       <SiteLayout>
         <div className="px-6 py-24 max-w-7xl mx-auto text-center">
-          <p className="font-bold text-navy/60 animate-pulse">Carregando Console Executivo...</p>
+          <p className="font-bold text-navy/60 animate-pulse">Carregando Console Executivo com Segurança...</p>
         </div>
       </SiteLayout>
     );
@@ -54,7 +61,7 @@ useEffect(() => {
       {/* CONTEÚDO PRINCIPAL COM O PAINEL EXECUTIVO SOLICITADO */}
       <section className="px-6 py-8 max-w-7xl mx-auto">
         
-        {/* O BLOCO DO PAINEL EXECUTIVO COM OS 4 BOTÕES ADICIONADO AQUI */}
+        {/* O BLOCO DO PAINEL EXECUTIVO COM OS 4 BOTÕES */}
         <div className="p-8 bg-card border border-navy/5 rounded-3xl shadow-sm mb-8">
           <p className="text-xs uppercase tracking-[0.25em] font-black text-navy/40 mb-3">
             Administração · Torcida Social
@@ -85,12 +92,15 @@ useEffect(() => {
               GERENCIAR NOTÍCIAS
             </button>
 
-            <Link 
-              to="/" 
-              className="bg-navy text-white font-black text-xs uppercase tracking-wider px-5 py-3.5 rounded-xl hover:bg-opacity-90 transition-all text-center"
+            <button 
+              type="button"
+              onClick={() => setActiveModule("metricas")}
+              className={`font-black text-xs uppercase tracking-wider px-5 py-3.5 rounded-xl transition-all ${
+                activeModule === "metricas" ? "bg-gold text-navy" : "bg-navy text-white hover:bg-opacity-90"
+              }`}
             >
-              VER CENTRAL PÚBLICA
-            </Link>
+              👁️ INTELIGÊNCIA GERAL
+            </button>
 
             {/* O QUARTO BOTÃO MÁGICO QUE ATIVA A CENTRAL INFANTIL */}
             <button
@@ -121,9 +131,13 @@ useEffect(() => {
             </div>
           )}
 
-          {/* SEÇÃO 2: MÉTRICAS / VISITANTES E APOIADORES */}
+          {/* SEÇÃO 2: MÉTRICAS / INTELIGÊNCIA GERAL (Antiga pública que ficou privada) */}
           {activeModule === "metricas" && (
             <div className="animate-fadeIn">
+              <div className="mb-6 border-b border-slate-100 pb-4">
+                <h3 className="text-2xl font-display font-black text-navy">📊 Inteligência Geral e Visão Estratégica</h3>
+                <p className="text-slate-500 text-sm">Métricas de controle interno restritas ao administrador.</p>
+              </div>
               <DashboardMetricas />
             </div>
           )}
@@ -132,7 +146,7 @@ useEffect(() => {
           {activeModule === "noticias" && (
             <div className="animate-fadeIn text-center py-12">
               <p className="text-navy/60 font-bold">Módulo de triagem de Notícias pronto e integrado.</p>
-              <p className="text-xs text-slate-400 mt-1">Clique em Central Infantil para gerenciar os dados médicos das crianças.</p>
+              <p className="text-xs text-slate-400 mt-1">Selecione, publique e apague informativos da plataforma.</p>
             </div>
           )}
           
