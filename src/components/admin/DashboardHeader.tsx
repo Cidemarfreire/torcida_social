@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router";
-
 export function DashboardHeader() {
+  const avatarUrl = "";
+  const initials = "CF";
+
   return (
     <header className="bg-gradient-to-r from-navy via-[#16375e] to-action text-white shadow-lg">
       <div className="max-w-7xl mx-auto px-8 py-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -18,20 +19,28 @@ export function DashboardHeader() {
           </p>
         </div>
 
-        <div className="flex gap-3 flex-wrap">
-          <Link
-            to="/perfil"
-            className="bg-white/10 hover:bg-white/20 transition-all px-5 py-3 rounded-xl font-black text-sm"
-          >
-            ← Meu Perfil
-          </Link>
+        <div className="flex items-center gap-4">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Cidemar Freire"
+              className="h-12 w-12 rounded-full object-cover border-2 border-white/30 shadow-md"
+            />
+          ) : (
+            <div className="h-12 w-12 rounded-full bg-gold text-navy flex items-center justify-center font-black text-lg shadow-md">
+              {initials}
+            </div>
+          )}
 
-          <Link
-            to="/"
-            className="bg-gold text-navy hover:brightness-110 transition-all px-5 py-3 rounded-xl font-black text-sm"
-          >
-            Site Público
-          </Link>
+          <div>
+            <p className="text-sm font-black text-white">
+              Cidemar Freire
+            </p>
+
+            <p className="text-xs text-white/70">
+              Fundador • Administrador Geral
+            </p>
+          </div>
         </div>
       </div>
     </header>
