@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { DashboardHome } from "@/components/admin/DashboardHome";
+import { DashboardCadastros } from "@/components/admin/modules/DashboardCadastros";
 import { DashboardLayout } from "@/components/admin/DashboardLayout";
 import {
   DashboardSidebar,
@@ -44,14 +45,7 @@ function PainelExecutivo() {
               onOpenMetricas={() => setActiveSection("metricas")}
             />
           )}
-
-          {activeSection === "cadastros" && (
-            <PlaceholderModule
-              eyebrow="Cadastros"
-              title="👥 Cadastro Geral"
-              description="Aqui entraremos com a listagem completa de usuários, edição de perfil, cidade, time, função e permissões."
-            />
-          )}
+{activeSection === "cadastros" && <DashboardCadastros />}
 
           {activeSection === "criancas" && (
             <PlaceholderModule
