@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-
+import { DashboardCentralInfantil } from "@/components/admin/modules/DashboardCentralInfantil";
 import { DashboardHeader } from "@/components/admin/DashboardHeader";
 import { DashboardHome } from "@/components/admin/DashboardHome";
 import { DashboardCadastros } from "@/components/admin/modules/DashboardCadastros";
@@ -41,28 +41,15 @@ function PainelExecutivo() {
             <DashboardHome
               onOpenCadastros={() => setActiveSection("cadastros")}
               onOpenCriancas={() => setActiveSection("criancas")}
-              onOpenNoticias={() => setActiveSection("noticias")}
+             
               onOpenMetricas={() => setActiveSection("metricas")}
             />
           )}
 {activeSection === "cadastros" && <DashboardCadastros />}
 
-          {activeSection === "criancas" && (
-            <PlaceholderModule
-              eyebrow="Central Infantil"
-              title="👶 Controle de Crianças"
-              description="Aqui entraremos com dados da criança, responsável, WhatsApp, saúde, medicamentos, horários, alergias e observações."
-            />
-          )}
+          {activeSection === "criancas" && <DashboardCentralInfantil />}
 
-          {activeSection === "noticias" && (
-            <PlaceholderModule
-              eyebrow="Central de Notícias"
-              title="📰 Redação Administrativa"
-              description="Aqui entraremos com coleta, aprovação, publicação, rejeição e exclusão de notícias."
-            />
-          )}
-
+         
           {activeSection === "metricas" && (
             <PlaceholderModule
               eyebrow="Insights"

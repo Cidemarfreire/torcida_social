@@ -376,13 +376,7 @@ function Perfil() {
                 >
                   PAINEL ADMIN
                 </Link>
-
-                <a
-                  href="/noticias"
-                  className="bg-background/10 backdrop-blur border border-background/20 text-background px-8 py-4 rounded-2xl font-black text-center hover:bg-background/20 transition-all"
-                >
-                  VER CENTRAL PÚBLICA
-                </a>
+                
               </div>
             </div>
           </div>

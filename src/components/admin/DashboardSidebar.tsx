@@ -2,8 +2,7 @@ type DashboardSection =
   | "home"
   | "cadastros"
   | "criancas"
-  | "noticias"
-  | "metricas"
+    | "metricas"
   | "doacoes"
   | "parceiros"
   | "configuracoes";
@@ -38,12 +37,7 @@ const menuItems: Array<{
     label: "📰 Notícias",
     description: "Coleta, aprovação e publicação",
   },
-  {
-    id: "metricas",
-    label: "📊 Métricas",
-    description: "Visitas e crescimento",
-  },
-  {
+    {
     id: "doacoes",
     label: "❤️ Doações",
     description: "Apoios e contribuições",
